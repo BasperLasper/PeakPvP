@@ -1,0 +1,222 @@
+config-version: 4
+
+kits:
+  unranked:
+    nodebuff:
+      display-name: '&aNoDebuff'
+      icon: DIAMOND_SWORD
+      items:
+        '0': {material: DIAMOND_SWORD, amount: 1, enchantments: {fire_aspect: 2, sharpness: 2, unbreaking: 3}}
+        '1': {material: ENDER_PEARL, amount: 16}
+        '2': {material: POTION, amount: 1, effect: SPEED, amplifier: 1}
+        '3': {material: POTION, amount: 1, effect: FIRE_RESISTANCE}
+        '8': {material: COOKED_BEEF, amount: 32}
+      fills:
+        healing: {material: SPLASH_POTION, amount: 1, effect: INSTANT_HEALTH, slots: '4-7,9-35'}
+      armor:
+        boots: {material: DIAMOND_BOOTS, enchantments: {feather_falling: 4, unbreaking: 3, protection: 2}}
+        leggings: {material: DIAMOND_LEGGINGS, enchantments: {protection: 2, unbreaking: 3}}
+        chestplate: {material: DIAMOND_CHESTPLATE, enchantments: {protection: 2, unbreaking: 3}}
+        helmet: {material: DIAMOND_HELMET, enchantments: {protection: 2, unbreaking: 3}}
+    debuff:
+      display-name: '&cDebuff'
+      icon: SPLASH_POTION
+      items:
+        '0': {material: DIAMOND_SWORD, amount: 1, enchantments: {unbreaking: 3, fire_aspect: 2, sharpness: 2}}
+        '1': {material: ENDER_PEARL, amount: 16}
+        '2': {material: SPLASH_POTION, amount: 1, effect: SLOWNESS}
+        '3': {material: SPLASH_POTION, amount: 1, effect: POISON}
+        '4': {material: SPLASH_POTION, amount: 1, effect: INSTANT_HEALTH}
+        '5': {material: SPLASH_POTION, amount: 1, effect: INSTANT_HEALTH}
+        '6': {material: POTION, amount: 1, effect: SPEED, amplifier: 1}
+        '7': {material: POTION, amount: 1, effect: FIRE_RESISTANCE}
+        '8': {material: COOKED_BEEF, amount: 64}
+      fills:
+        healing: {material: SPLASH_POTION, amount: 1, effect: INSTANT_HEALTH, slots: '9-35'}
+      armor:
+        boots: {material: DIAMOND_BOOTS, enchantments: {unbreaking: 3, protection: 2, feather_falling: 4}}
+        leggings: {material: DIAMOND_LEGGINGS, enchantments: {unbreaking: 3, protection: 2}}
+        chestplate: {material: DIAMOND_CHESTPLATE, enchantments: {unbreaking: 3, protection: 2}}
+        helmet: {material: DIAMOND_HELMET, enchantments: {unbreaking: 3, protection: 2}}
+    hcf:
+      display-name: '&6HCF'
+      icon: GOLDEN_APPLE
+      items:
+        '0': {material: DIAMOND_SWORD, amount: 1, enchantments: {unbreaking: 3, fire_aspect: 2, sharpness: 2}}
+        '1': {material: ENDER_PEARL, amount: 16}
+        '2': {material: GOLDEN_APPLE, amount: 16}
+        '8': {material: COOKED_BEEF, amount: 64}
+      armor:
+        boots: {material: DIAMOND_BOOTS, enchantments: {unbreaking: 3, protection: 2, feather_falling: 4}}
+        leggings: {material: DIAMOND_LEGGINGS, enchantments: {unbreaking: 3, protection: 2}}
+        chestplate: {material: DIAMOND_CHESTPLATE, enchantments: {unbreaking: 3, protection: 2}}
+        helmet: {material: DIAMOND_HELMET, enchantments: {unbreaking: 3, protection: 2}}
+    build-uhc:
+      display-name: '&eBuild UHC'
+      icon: FISHING_ROD
+      items:
+        '0': {material: DIAMOND_SWORD, amount: 1, enchantments: {sharpness: 3}}
+        '1': {material: FISHING_ROD, amount: 1}
+        '2': {material: WATER_BUCKET, amount: 1}
+        '3': {material: LAVA_BUCKET, amount: 1}
+        '4': {material: GOLDEN_APPLE, amount: 6}
+        '5': {material: COBBLESTONE, amount: 64}
+        '6': {material: OAK_PLANKS, amount: 64}
+        '7': {material: COOKED_BEEF, amount: 64}
+        '8': {material: BOW, amount: 1, enchantments: {power: 4}}
+        '9': {material: ARROW, amount: 64}
+        '10': {material: LAVA_BUCKET, amount: 1}
+        '11': {material: WATER_BUCKET, amount: 1}
+        '34': {material: STONE_PICKAXE, amount: 1}
+        '35': {material: STONE_AXE, amount: 1}
+      armor:
+        boots: {material: DIAMOND_BOOTS, enchantments: {protection: 2}}
+        leggings: {material: DIAMOND_LEGGINGS, enchantments: {protection: 2}}
+        chestplate: {material: DIAMOND_CHESTPLATE, enchantments: {protection: 2}}
+        helmet: {material: DIAMOND_HELMET, enchantments: {protection: 2}}
+    combo:
+      display-name: '&bCombo'
+      icon: BLAZE_POWDER
+      items:
+        '0': {material: DIAMOND_SWORD, amount: 1, enchantments: {unbreaking: 3, sharpness: 5}}
+        '1': {material: ENCHANTED_GOLDEN_APPLE, amount: 64}
+        '2': {material: DIAMOND_HELMET, amount: 1, enchantments: {unbreaking: 3, protection: 4}}
+        '3': {material: DIAMOND_CHESTPLATE, amount: 1, enchantments: {unbreaking: 3, protection: 4}}
+        '4': {material: DIAMOND_LEGGINGS, amount: 1, enchantments: {unbreaking: 3, protection: 4}}
+        '5': {material: DIAMOND_BOOTS, amount: 1, enchantments: {unbreaking: 3, protection: 4}}
+        '7': {material: POTION, amount: 1, effect: STRENGTH, amplifier: 1}
+        '8': {material: POTION, amount: 1, effect: SPEED, amplifier: 1}
+        '34': {material: POTION, amount: 1, effect: STRENGTH, amplifier: 1}
+        '35': {material: POTION, amount: 1, effect: SPEED, amplifier: 1}
+      armor:
+        boots: {material: DIAMOND_BOOTS, enchantments: {unbreaking: 3, protection: 4}}
+        leggings: {material: DIAMOND_LEGGINGS, enchantments: {unbreaking: 3, protection: 4}}
+        chestplate: {material: DIAMOND_CHESTPLATE, enchantments: {unbreaking: 3, protection: 4}}
+        helmet: {material: DIAMOND_HELMET, enchantments: {unbreaking: 3, protection: 4}}
+    gapples:
+      display-name: '&dGapples'
+      icon: ENCHANTED_GOLDEN_APPLE
+      items:
+        '0': {material: DIAMOND_SWORD, amount: 1, enchantments: {unbreaking: 3, sharpness: 5}}
+        '1': {material: ENCHANTED_GOLDEN_APPLE, amount: 64}
+        '2': {material: DIAMOND_HELMET, amount: 1, enchantments: {unbreaking: 3, protection: 4}}
+        '3': {material: DIAMOND_CHESTPLATE, amount: 1, enchantments: {unbreaking: 3, protection: 4}}
+        '4': {material: DIAMOND_LEGGINGS, amount: 1, enchantments: {unbreaking: 3, protection: 4}}
+        '5': {material: DIAMOND_BOOTS, amount: 1, enchantments: {unbreaking: 3, protection: 4}}
+        '7': {material: POTION, amount: 1, effect: STRENGTH, amplifier: 1}
+        '8': {material: POTION, amount: 1, effect: SPEED, amplifier: 1}
+        '34': {material: POTION, amount: 1, effect: STRENGTH, amplifier: 1}
+        '35': {material: POTION, amount: 1, effect: SPEED, amplifier: 1}
+      armor:
+        boots: {material: DIAMOND_BOOTS, enchantments: {unbreaking: 3, protection: 4}}
+        leggings: {material: DIAMOND_LEGGINGS, enchantments: {unbreaking: 3, protection: 4}}
+        chestplate: {material: DIAMOND_CHESTPLATE, enchantments: {unbreaking: 3, protection: 4}}
+        helmet: {material: DIAMOND_HELMET, enchantments: {unbreaking: 3, protection: 4}}
+    soup:
+      display-name: '&aSoup'
+      icon: MUSHROOM_STEW
+      items:
+        '0': {material: DIAMOND_SWORD, amount: 1, enchantments: {sharpness: 1}}
+        '8': {material: POTION, amount: 1, effect: SPEED, amplifier: 1}
+      fills:
+        soup: {material: MUSHROOM_STEW, amount: 1, slots: '1-7,9-35'}
+      armor:
+        boots: {material: IRON_BOOTS}
+        leggings: {material: IRON_LEGGINGS}
+        chestplate: {material: IRON_CHESTPLATE}
+        helmet: {material: IRON_HELMET}
+    sumo:
+      display-name: '&fSumo'
+      icon: SLIME_BALL
+      items:
+        '8': {material: RAW_PORKCHOP, amount: 64}
+    no-enchant:
+      display-name: '&7No Enchant'
+      icon: IRON_SWORD
+      items:
+        '0': {material: DIAMOND_SWORD, amount: 1}
+        '1': {material: ENDER_PEARL, amount: 16}
+        '8': {material: COOKED_BEEF, amount: 64}
+      armor:
+        boots: {material: DIAMOND_BOOTS}
+        leggings: {material: DIAMOND_LEGGINGS}
+        chestplate: {material: DIAMOND_CHESTPLATE}
+        helmet: {material: DIAMOND_HELMET}
+    skywars:
+      display-name: '&bSkywars'
+      icon: ENDER_EYE
+      items:
+        '0': {material: STONE_SWORD, amount: 1}
+        '1': {material: FISHING_ROD, amount: 1}
+        '2': {material: BOW, amount: 1}
+        '3': {material: FLINT_AND_STEEL, amount: 1}
+        '4': {material: WATER_BUCKET, amount: 1}
+        '5': {material: POTION, amount: 1, name: '&fUncraftable Potion'}
+        '6': {material: SNOWBALL, amount: 6}
+        '7': {material: BREAD, amount: 9}
+        '8': {material: OAK_PLANKS, amount: 64}
+        '17': {material: ARROW, amount: 5}
+        '35': {material: COBBLESTONE, amount: 64}
+      armor:
+        boots: {material: IRON_BOOTS}
+        leggings: {material: IRON_LEGGINGS}
+        chestplate: {material: IRON_CHESTPLATE}
+        helmet: {material: IRON_HELMET}
+    archer:
+      display-name: '&2Archer'
+      icon: BOW
+      items:
+        '0': {material: BOW, amount: 1, enchantments: {power: 2}}
+        '1': {material: IRON_AXE, amount: 1}
+        '7': {material: ARROW, amount: 64}
+        '8': {material: GOLDEN_APPLE, amount: 10}
+        '35': {material: ARROW, amount: 32}
+      armor:
+        boots: {material: IRON_BOOTS}
+        leggings: {material: IRON_LEGGINGS}
+        chestplate: {material: IRON_CHESTPLATE}
+        helmet: {material: IRON_HELMET}
+    axe-pvp:
+      display-name: '&cAxe PvP'
+      icon: DIAMOND_AXE
+      items:
+        '0': {material: DIAMOND_AXE, amount: 1, enchantments: {sharpness: 2}}
+        '1': {material: GOLDEN_APPLE, amount: 16}
+      armor:
+        boots: {material: IRON_BOOTS, enchantments: {unbreaking: 3, protection: 2, feather_falling: 4}}
+        leggings: {material: IRON_LEGGINGS, enchantments: {unbreaking: 3, protection: 2}}
+        chestplate: {material: IRON_CHESTPLATE, enchantments: {unbreaking: 3, protection: 2}}
+        helmet: {material: IRON_HELMET, enchantments: {unbreaking: 3, protection: 2}}
+    mace:
+      display-name: '&5Mace'
+      icon: MACE
+      items:
+        '0': {material: NETHERITE_SWORD, amount: 1, enchantments: {unbreaking: 3, sharpness: 5}}
+        '1': {material: MACE, amount: 1, enchantments: {unbreaking: 3, breach: 4}}
+        '2': {material: MACE, amount: 1, enchantments: {unbreaking: 3, wind_burst: 2, density: 4}}
+        '3': {material: GOLDEN_APPLE, amount: 32}
+        '4': {material: WIND_CHARGE, amount: 64}
+        '5': {material: ENDER_PEARL, amount: 16}
+        '6': {material: ELYTRA, amount: 1}
+        '7': {material: SHIELD, amount: 1, enchantments: {unbreaking: 3}}
+        '8': {material: NETHERITE_AXE, amount: 1, enchantments: {unbreaking: 3, sharpness: 5}}
+        '17': {material: RED_SHULKER_BOX, amount: 1}
+        '26': {material: ENCHANTED_GOLDEN_APPLE, amount: 8}
+        '30': {material: ENDER_PEARL, amount: 16}
+        '31': {material: ENDER_PEARL, amount: 16}
+        '32': {material: ENDER_PEARL, amount: 16}
+        '34': {material: TOTEM_OF_UNDYING, amount: 1}
+        '35': {material: WIND_CHARGE, amount: 64}
+      fills:
+        swiftness: {material: SPLASH_POTION, amount: 1, effect: SPEED, slots: '9-12,18-21,27-29'}
+        strength: {material: SPLASH_POTION, amount: 1, effect: STRENGTH, slots: '13-16,22-25,33'}
+      armor:
+        boots: {material: NETHERITE_BOOTS, enchantments: {protection: 6, feather_falling: 5}}
+        leggings: {material: NETHERITE_LEGGINGS, enchantments: {protection: 6}}
+        chestplate: {material: NETHERITE_CHESTPLATE, enchantments: {protection: 6}}
+        helmet: {material: NETHERITE_HELMET, enchantments: {protection: 6}}
+    boxing:
+      display-name: '&9Boxing'
+      icon: IRON_HELMET
+      items:
+        '0': {material: IRON_SWORD, amount: 1, name: '&9Boxing Sword'}

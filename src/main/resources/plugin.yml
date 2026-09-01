@@ -1,0 +1,80 @@
+name: PeakPvP
+version: '${version}'
+main: com.basper.peakpvp.PeakPvPPlugin
+load: STARTUP
+api-version: '1.21'
+authors: [Basper]
+description: Peak's duels and kit PvP server plugin.
+softdepend: [LuckPerms]
+commands:
+  peakpvp:
+    description: PeakPvP administration and arena setup
+    usage: /peakpvp help
+    aliases: [ppreload]
+  spawn:
+    description: Teleport to the PvP spawn
+  kit:
+    description: Choose and equip an available kit
+    usage: /kit [nodebuff]
+    aliases: [kits]
+  nextkit:
+    description: Show the current PvP Zone kit and next rotation time
+    usage: /nextkit
+  skipkit:
+    description: Vote to skip to the next PvP Zone kit (2 votes required)
+    usage: /skipkit
+  party:
+    description: Create and manage two-player parties
+    usage: /party <create|invite|accept|leave>
+    aliases: [parties]
+  duel:
+    description: Challenge a player to a spawn duel
+    usage: /duel <player>
+  chatcolor:
+    description: Select your VIP default chat colour
+    usage: /chatcolor
+    aliases: [chatcolour]
+  namecolor:
+    description: Select your VIP name colour
+    usage: /namecolor
+    aliases: [namecolour]
+  color:
+    description: Open the chat and name colour menu
+    usage: /color
+    aliases: [colour]
+permissions:
+  peakpvp.admin:
+    description: Grants all PeakPvP administrative features
+    default: op
+    children:
+      peakpvp.admin.reload: true
+      peakpvp.admin.build: true
+      peakpvp.admin.spawnpvp: true
+      peakpvp.admin.arena: true
+  peakpvp.admin.reload:
+    description: Allows reloading PeakPvP
+    default: false
+  peakpvp.admin.build:
+    description: Allows block changes in the PvP world
+    default: false
+  peakpvp.admin.spawnpvp:
+    description: Allows dealing PvP damage inside spawn protection
+    default: false
+  peakpvp.admin.arena:
+    description: Allows creating and managing duel arenas
+    default: false
+  peakpvp.kit.use:
+    description: Allows choosing and equipping PvP kits
+    default: true
+  peakpvp.vip:
+    description: Grants PeakPvP VIP features
+    default: false
+    children:
+      peakpvp.vip.chatcolor: true
+      peakpvp.vip.namecolor: true
+  peakpvp.vip.chatcolor:
+    description: Allows selecting a default chat colour
+    default: false
+  peakpvp.vip.namecolor:
+    description: Allows selecting a name colour
+    default: false

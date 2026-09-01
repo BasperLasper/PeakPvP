@@ -1,0 +1,11 @@
+.gradle/
+build/
+*.log
+
+# Webhooks and secret-bearing environment files
+.env
+.env.*
+!.env.example
+.github/workflows/build-and-update.yml
+scripts/send-update.ps1
+**/*webhook*

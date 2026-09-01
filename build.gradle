@@ -1,0 +1,28 @@
+plugins {
+    id 'java'
+}
+
+group = 'com.basper'
+version = '0.1.0'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+
+dependencies {
+    compileOnly 'io.papermc.paper:paper-api:1.21.8-R0.1-SNAPSHOT'
+    compileOnly 'net.luckperms:api:5.4'
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.release = 21
+}
+
+tasks.processResources {
+    filteringCharset = 'UTF-8'
+    filesMatching('plugin.yml') { expand(version: project.version) }
+}
+
+tasks.jar { archiveBaseName = 'PeakPvP' }

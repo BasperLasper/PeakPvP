@@ -1,0 +1,404 @@
+Save Inventory: nodebuff
+Player: Basperr
+World: minecraft:arenas
+
+Inventory:
+Slot 0: Diamond Sword x1 [enchants: minecraft:fire_aspect 2, minecraft:sharpness 2, minecraft:unbreaking 3]
+Slot 1: Ender Pearl x16
+Slot 2: Speed 2 x1
+Slot 3: Potion of Fire Resistance x1
+Slot 4: Splash Potion of Healing x1
+Slot 5: Splash Potion of Healing x1
+Slot 6: Splash Potion of Healing x1
+Slot 7: Splash Potion of Healing x1
+Slot 8: Steak x32
+Slot 9: Splash Potion of Healing x1
+Slot 10: Splash Potion of Healing x1
+Slot 11: Splash Potion of Healing x1
+Slot 12: Splash Potion of Healing x1
+Slot 13: Splash Potion of Healing x1
+Slot 14: Splash Potion of Healing x1
+Slot 15: Splash Potion of Healing x1
+Slot 16: Splash Potion of Healing x1
+Slot 17: Splash Potion of Healing x1
+Slot 18: Splash Potion of Healing x1
+Slot 19: Splash Potion of Healing x1
+Slot 20: Splash Potion of Healing x1
+Slot 21: Splash Potion of Healing x1
+Slot 22: Splash Potion of Healing x1
+Slot 23: Splash Potion of Healing x1
+Slot 24: Splash Potion of Healing x1
+Slot 25: Splash Potion of Healing x1
+Slot 26: Splash Potion of Healing x1
+Slot 27: Splash Potion of Healing x1
+Slot 28: Splash Potion of Healing x1
+Slot 29: Splash Potion of Healing x1
+Slot 30: Splash Potion of Healing x1
+Slot 31: Splash Potion of Healing x1
+Slot 32: Splash Potion of Healing x1
+Slot 33: Splash Potion of Healing x1
+Slot 34: Splash Potion of Healing x1
+Slot 35: Splash Potion of Healing x1
+Slot 36: Diamond Boots x1 [enchants: minecraft:feather_falling 4, minecraft:unbreaking 3, minecraft:protection 2]
+Slot 37: Diamond Leggings x1 [enchants: minecraft:protection 2, minecraft:unbreaking 3]
+Slot 38: Diamond Chestplate x1 [enchants: minecraft:protection 2, minecraft:unbreaking 3]
+Slot 39: Diamond Helmet x1 [enchants: minecraft:protection 2, minecraft:unbreaking 3]
+
+Armor:
+Armor 0: Diamond Boots x1 [enchants: minecraft:feather_falling 4, minecraft:unbreaking 3, minecraft:protection 2]
+Armor 1: Diamond Leggings x1 [enchants: minecraft:protection 2, minecraft:unbreaking 3]
+Armor 2: Diamond Chestplate x1 [enchants: minecraft:protection 2, minecraft:unbreaking 3]
+Armor 3: Diamond Helmet x1 [enchants: minecraft:protection 2, minecraft:unbreaking 3]
+
+Save Inventory: debuff
+Player: Basperr
+World: minecraft:arenas_1
+
+Inventory:
+Slot 0: Diamond Sword x1 [enchants: minecraft:unbreaking 3, minecraft:fire_aspect 2, minecraft:sharpness 2]
+Slot 1: Ender Pearl x16
+Slot 2: Splash Potion of Slowness x1
+Slot 3: Splash Potion of Poison x1
+Slot 4: Splash Potion of Healing x1
+Slot 5: Splash Potion of Healing x1
+Slot 6: Speed 2 x1
+Slot 7: Potion of Fire Resistance x1
+Slot 8: Steak x64
+Slot 9: Splash Potion of Healing x1
+Slot 10: Splash Potion of Healing x1
+Slot 11: Splash Potion of Healing x1
+Slot 12: Splash Potion of Healing x1
+Slot 13: Splash Potion of Healing x1
+Slot 14: Splash Potion of Healing x1
+Slot 15: Splash Potion of Healing x1
+Slot 16: Splash Potion of Healing x1
+Slot 17: Splash Potion of Healing x1
+Slot 18: Splash Potion of Healing x1
+Slot 19: Splash Potion of Healing x1
+Slot 20: Splash Potion of Healing x1
+Slot 21: Splash Potion of Healing x1
+Slot 22: Splash Potion of Healing x1
+Slot 23: Splash Potion of Healing x1
+Slot 24: Splash Potion of Healing x1
+Slot 25: Splash Potion of Healing x1
+Slot 26: Splash Potion of Healing x1
+Slot 27: Splash Potion of Healing x1
+Slot 28: Splash Potion of Healing x1
+Slot 29: Splash Potion of Healing x1
+Slot 30: Splash Potion of Healing x1
+Slot 31: Splash Potion of Healing x1
+Slot 32: Splash Potion of Healing x1
+Slot 33: Splash Potion of Healing x1
+Slot 34: Splash Potion of Healing x1
+Slot 35: Splash Potion of Healing x1
+Slot 36: Diamond Boots x1 [enchants: minecraft:unbreaking 3, minecraft:protection 2, minecraft:feather_falling 4]
+Slot 37: Diamond Leggings x1 [enchants: minecraft:unbreaking 3, minecraft:protection 2]
+Slot 38: Diamond Chestplate x1 [enchants: minecraft:unbreaking 3, minecraft:protection 2]
+Slot 39: Diamond Helmet x1 [enchants: minecraft:unbreaking 3, minecraft:protection 2]
+
+Armor:
+Armor 0: Diamond Boots x1 [enchants: minecraft:unbreaking 3, minecraft:protection 2, minecraft:feather_falling 4]
+Armor 1: Diamond Leggings x1 [enchants: minecraft:unbreaking 3, minecraft:protection 2]
+Armor 2: Diamond Chestplate x1 [enchants: minecraft:unbreaking 3, minecraft:protection 2]
+Armor 3: Diamond Helmet x1 [enchants: minecraft:unbreaking 3, minecraft:protection 2]
+
+Save Inventory: hcf
+Player: Basperr
+World: minecraft:arenas_1
+
+Inventory:
+Slot 0: Diamond Sword x1 [enchants: minecraft:unbreaking 3, minecraft:fire_aspect 2, minecraft:sharpness 2]
+Slot 1: Ender Pearl x16
+Slot 2: Golden Apple x16
+Slot 8: Steak x64
+Slot 36: Diamond Boots x1 [enchants: minecraft:unbreaking 3, minecraft:protection 2, minecraft:feather_falling 4]
+Slot 37: Diamond Leggings x1 [enchants: minecraft:unbreaking 3, minecraft:protection 2]
+Slot 38: Diamond Chestplate x1 [enchants: minecraft:unbreaking 3, minecraft:protection 2]
+Slot 39: Diamond Helmet x1 [enchants: minecraft:unbreaking 3, minecraft:protection 2]
+
+Armor:
+Armor 0: Diamond Boots x1 [enchants: minecraft:unbreaking 3, minecraft:protection 2, minecraft:feather_falling 4]
+Armor 1: Diamond Leggings x1 [enchants: minecraft:unbreaking 3, minecraft:protection 2]
+Armor 2: Diamond Chestplate x1 [enchants: minecraft:unbreaking 3, minecraft:protection 2]
+Armor 3: Diamond Helmet x1 [enchants: minecraft:unbreaking 3, minecraft:protection 2]
+
+Save Inventory: Build UHC
+Player: Basperr
+World: minecraft:arenas_1
+
+Inventory:
+Slot 0: Diamond Sword x1 [enchants: minecraft:sharpness 3]
+Slot 1: Fishing Rod x1
+Slot 2: Water Bucket x1
+Slot 3: Lava Bucket x1
+Slot 4: Golden Apple x6
+Slot 5: Cobblestone x64
+Slot 6: Oak Planks x64
+Slot 7: Steak x64
+Slot 8: Bow x1 [enchants: minecraft:power 4]
+Slot 9: Arrow x64
+Slot 10: Lava Bucket x1
+Slot 11: Water Bucket x1
+Slot 34: Stone Pickaxe x1
+Slot 35: Stone Axe x1
+Slot 36: Diamond Boots x1 [enchants: minecraft:protection 2]
+Slot 37: Diamond Leggings x1 [enchants: minecraft:protection 2]
+Slot 38: Diamond Chestplate x1 [enchants: minecraft:protection 2]
+Slot 39: Diamond Helmet x1 [enchants: minecraft:protection 2]
+
+Armor:
+Armor 0: Diamond Boots x1 [enchants: minecraft:protection 2]
+Armor 1: Diamond Leggings x1 [enchants: minecraft:protection 2]
+Armor 2: Diamond Chestplate x1 [enchants: minecraft:protection 2]
+Armor 3: Diamond Helmet x1 [enchants: minecraft:protection 2]
+
+Save Inventory: Combo
+Player: Basperr
+World: minecraft:arenas
+
+Inventory:
+Slot 0: Diamond Sword x1 [enchants: minecraft:unbreaking 3, minecraft:sharpness 5]
+Slot 1: Enchanted Golden Apple x64
+Slot 2: Diamond Helmet x1 [enchants: minecraft:unbreaking 3, minecraft:protection 4]
+Slot 3: Diamond Chestplate x1 [enchants: minecraft:unbreaking 3, minecraft:protection 4]
+Slot 4: Diamond Leggings x1 [enchants: minecraft:unbreaking 3, minecraft:protection 4]
+Slot 5: Diamond Boots x1 [enchants: minecraft:unbreaking 3, minecraft:protection 4]
+Slot 7: Strength 2 x1
+Slot 8: Speed 2 x1
+Slot 34: Strength 2 x1
+Slot 35: Speed 2 x1
+Slot 36: Diamond Boots x1 [enchants: minecraft:unbreaking 3, minecraft:protection 4]
+Slot 37: Diamond Leggings x1 [enchants: minecraft:unbreaking 3, minecraft:protection 4]
+Slot 38: Diamond Chestplate x1 [enchants: minecraft:unbreaking 3, minecraft:protection 4]
+Slot 39: Diamond Helmet x1 [enchants: minecraft:unbreaking 3, minecraft:protection 4]
+
+Armor:
+Armor 0: Diamond Boots x1 [enchants: minecraft:unbreaking 3, minecraft:protection 4]
+Armor 1: Diamond Leggings x1 [enchants: minecraft:unbreaking 3, minecraft:protection 4]
+Armor 2: Diamond Chestplate x1 [enchants: minecraft:unbreaking 3, minecraft:protection 4]
+Armor 3: Diamond Helmet x1 [enchants: minecraft:unbreaking 3, minecraft:protection 4]
+
+Save Inventory: Gapples
+Player: Basperr
+World: minecraft:arenas_1
+
+Inventory:
+Slot 0: Diamond Sword x1 [enchants: minecraft:unbreaking 3, minecraft:sharpness 5]
+Slot 1: Enchanted Golden Apple x64
+Slot 2: Diamond Helmet x1 [enchants: minecraft:unbreaking 3, minecraft:protection 4]
+Slot 3: Diamond Chestplate x1 [enchants: minecraft:unbreaking 3, minecraft:protection 4]
+Slot 4: Diamond Leggings x1 [enchants: minecraft:unbreaking 3, minecraft:protection 4]
+Slot 5: Diamond Boots x1 [enchants: minecraft:unbreaking 3, minecraft:protection 4]
+Slot 7: Strength 2 x1
+Slot 8: Speed 2 x1
+Slot 34: Strength 2 x1
+Slot 35: Speed 2 x1
+Slot 36: Diamond Boots x1 [enchants: minecraft:unbreaking 3, minecraft:protection 4]
+Slot 37: Diamond Leggings x1 [enchants: minecraft:unbreaking 3, minecraft:protection 4]
+Slot 38: Diamond Chestplate x1 [enchants: minecraft:unbreaking 3, minecraft:protection 4]
+Slot 39: Diamond Helmet x1 [enchants: minecraft:unbreaking 3, minecraft:protection 4]
+
+Armor:
+Armor 0: Diamond Boots x1 [enchants: minecraft:unbreaking 3, minecraft:protection 4]
+Armor 1: Diamond Leggings x1 [enchants: minecraft:unbreaking 3, minecraft:protection 4]
+Armor 2: Diamond Chestplate x1 [enchants: minecraft:unbreaking 3, minecraft:protection 4]
+Armor 3: Diamond Helmet x1 [enchants: minecraft:unbreaking 3, minecraft:protection 4]
+
+Save Inventory: soup
+Player: Basperr
+World: minecraft:arenas_2
+
+Inventory:
+Slot 0: Diamond Sword x1 [enchants: minecraft:sharpness 1]
+Slot 1: Mushroom Stew x1
+Slot 2: Mushroom Stew x1
+Slot 3: Mushroom Stew x1
+Slot 4: Mushroom Stew x1
+Slot 5: Mushroom Stew x1
+Slot 6: Mushroom Stew x1
+Slot 7: Mushroom Stew x1
+Slot 8: Speed 2 x1
+Slot 9: Mushroom Stew x1
+Slot 10: Mushroom Stew x1
+Slot 11: Mushroom Stew x1
+Slot 12: Mushroom Stew x1
+Slot 13: Mushroom Stew x1
+Slot 14: Mushroom Stew x1
+Slot 15: Mushroom Stew x1
+Slot 16: Mushroom Stew x1
+Slot 17: Mushroom Stew x1
+Slot 18: Mushroom Stew x1
+Slot 19: Mushroom Stew x1
+Slot 20: Mushroom Stew x1
+Slot 21: Mushroom Stew x1
+Slot 22: Mushroom Stew x1
+Slot 23: Mushroom Stew x1
+Slot 24: Mushroom Stew x1
+Slot 25: Mushroom Stew x1
+Slot 26: Mushroom Stew x1
+Slot 27: Mushroom Stew x1
+Slot 28: Mushroom Stew x1
+Slot 29: Mushroom Stew x1
+Slot 30: Mushroom Stew x1
+Slot 31: Mushroom Stew x1
+Slot 32: Mushroom Stew x1
+Slot 33: Mushroom Stew x1
+Slot 34: Mushroom Stew x1
+Slot 35: Mushroom Stew x1
+Slot 36: Iron Boots x1
+Slot 37: Iron Leggings x1
+Slot 38: Iron Chestplate x1
+Slot 39: Iron Helmet x1
+
+Armor:
+Armor 0: Iron Boots x1
+Armor 1: Iron Leggings x1
+Armor 2: Iron Chestplate x1
+Armor 3: Iron Helmet x1
+
+Save Inventory: sumo
+Player: Basperr
+World: minecraft:arenas_2
+
+Inventory:
+Slot 8: Raw Porkchop x64
+
+Armor:
+
+Save Inventory: no enchant
+Player: Basperr
+World: minecraft:arenas_1
+
+Inventory:
+Slot 0: Diamond Sword x1
+Slot 1: Ender Pearl x16
+Slot 8: Steak x64
+Slot 36: Diamond Boots x1
+Slot 37: Diamond Leggings x1
+Slot 38: Diamond Chestplate x1
+Slot 39: Diamond Helmet x1
+
+Armor:
+Armor 0: Diamond Boots x1
+Armor 1: Diamond Leggings x1
+Armor 2: Diamond Chestplate x1
+Armor 3: Diamond Helmet x1
+
+Save Inventory: Skywars
+Player: Basperr
+World: minecraft:arenas_2
+
+Inventory:
+Slot 0: Stone Sword x1
+Slot 1: Fishing Rod x1
+Slot 2: Bow x1
+Slot 3: Flint and Steel x1
+Slot 4: Water Bucket x1
+Slot 5: Uncraftable Potion x1
+Slot 6: Snowball x6
+Slot 7: Bread x9
+Slot 8: Oak Planks x64
+Slot 17: Arrow x5
+Slot 35: Cobblestone x64
+Slot 36: Iron Boots x1
+Slot 37: Iron Leggings x1
+Slot 38: Iron Chestplate x1
+Slot 39: Iron Helmet x1
+
+Armor:
+Armor 0: Iron Boots x1
+Armor 1: Iron Leggings x1
+Armor 2: Iron Chestplate x1
+Armor 3: Iron Helmet x1
+
+Save Inventory: Archer
+Player: Basperr
+World: minecraft:arenas_1
+
+Inventory:
+Slot 0: Bow x1 [enchants: minecraft:power 2]
+Slot 1: Iron Axe x1
+Slot 7: Arrow x64
+Slot 8: Golden Apple x10
+Slot 35: Arrow x32
+Slot 36: Iron Boots x1
+Slot 37: Iron Leggings x1
+Slot 38: Iron Chestplate x1
+Slot 39: Iron Helmet x1
+
+Armor:
+Armor 0: Iron Boots x1
+Armor 1: Iron Leggings x1
+Armor 2: Iron Chestplate x1
+Armor 3: Iron Helmet x1
+
+Save Inventory: Axe PvP
+Player: Basperr
+World: minecraft:arenas_2
+
+Inventory:
+Slot 0: Diamond Axe x1 [enchants: minecraft:sharpness 2]
+Slot 1: Golden Apple x16
+Slot 36: Iron Boots x1 [enchants: minecraft:unbreaking 3, minecraft:protection 2, minecraft:feather_falling 4]
+Slot 37: Iron Leggings x1 [enchants: minecraft:unbreaking 3, minecraft:protection 2]
+Slot 38: Iron Chestplate x1 [enchants: minecraft:unbreaking 3, minecraft:protection 2]
+Slot 39: Iron Helmet x1 [enchants: minecraft:unbreaking 3, minecraft:protection 2]
+
+Armor:
+Armor 0: Iron Boots x1 [enchants: minecraft:unbreaking 3, minecraft:protection 2, minecraft:feather_falling 4]
+Armor 1: Iron Leggings x1 [enchants: minecraft:unbreaking 3, minecraft:protection 2]
+Armor 2: Iron Chestplate x1 [enchants: minecraft:unbreaking 3, minecraft:protection 2]
+Armor 3: Iron Helmet x1 [enchants: minecraft:unbreaking 3, minecraft:protection 2]
+
+Save Inventory: Mace
+Player: Basperr
+World: minecraft:arenas_1
+
+Inventory:
+Slot 0: Netherite Sword x1 [enchants: minecraft:unbreaking 3, minecraft:sharpness 5]
+Slot 1: Mace x1 [enchants: minecraft:unbreaking 3, minecraft:breach 4]
+Slot 2: Mace x1 [enchants: minecraft:unbreaking 3, minecraft:wind_burst 2, minecraft:density 4]
+Slot 3: Golden Apple x32
+Slot 4: Wind Charge x64
+Slot 5: Ender Pearl x16
+Slot 6: Elytra x1
+Slot 7: Shield x1 [enchants: minecraft:unbreaking 3]
+Slot 8: Netherite Axe x1 [enchants: minecraft:unbreaking 3, minecraft:sharpness 5]
+Slot 9: Splash Potion of Swiftness x1
+Slot 10: Splash Potion of Swiftness x1
+Slot 11: Splash Potion of Swiftness x1
+Slot 12: Splash Potion of Swiftness x1
+Slot 13: Splash Potion of Strength x1
+Slot 14: Splash Potion of Strength x1
+Slot 15: Splash Potion of Strength x1
+Slot 16: Splash Potion of Strength x1
+Slot 17: Red Shulker Box x1
+Slot 18: Splash Potion of Swiftness x1
+Slot 19: Splash Potion of Swiftness x1
+Slot 20: Splash Potion of Swiftness x1
+Slot 21: Splash Potion of Swiftness x1
+Slot 22: Splash Potion of Strength x1
+Slot 23: Splash Potion of Strength x1
+Slot 24: Splash Potion of Strength x1
+Slot 25: Splash Potion of Strength x1
+Slot 26: Enchanted Golden Apple x8
+Slot 27: Splash Potion of Swiftness x1
+Slot 28: Splash Potion of Swiftness x1
+Slot 29: Splash Potion of Swiftness x1
+Slot 30: Ender Pearl x16
+Slot 31: Ender Pearl x16
+Slot 32: Ender Pearl x16
+Slot 33: Splash Potion of Strength x1
+Slot 34: Totem of Undying x1
+Slot 35: Wind Charge x64
+Slot 36: Netherite Boots x1 [enchants: minecraft:protection 6, minecraft:feather_falling 5]
+Slot 37: Netherite Leggings x1 [enchants: minecraft:protection 6]
+Slot 38: Netherite Chestplate x1 [enchants: minecraft:protection 6]
+Slot 39: Netherite Helmet x1 [enchants: minecraft:protection 6]
+
+Armor:
+Armor 0: Netherite Boots x1 [enchants: minecraft:protection 6, minecraft:feather_falling 5]
+Armor 1: Netherite Leggings x1 [enchants: minecraft:protection 6]
+Armor 2: Netherite Chestplate x1 [enchants: minecraft:protection 6]
+Armor 3: Netherite Helmet x1 [enchants: minecraft:protection 6]
+
