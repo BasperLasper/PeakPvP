@@ -1,5 +1,6 @@
 ## PeakPvP 0.1.0
 
+- Added the `/seen <player>` command using Paper's persisted offline-player last-seen data.
 - Created the Paper 1.21.8 and Java 21 Gradle project foundation.
 - Added startup-safe void-world creation and the `PeakPvP` chunk generator.
 - Spawn places one bedrock block at 0, 64, 0 and positions players at 0.5, 65, 0.5.

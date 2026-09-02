@@ -1,5 +1,6 @@
 ## PeakPvP 0.1.0
 
+- Added `/seen <player>` to check whether a player is online and when they were last seen.
 - Added a void PvP world with a single bedrock spawn block at 0, 64, 0.
 - Added world block protection and a configurable 100-block no-PvP spawn radius.
 - Added Peak-style LuckPerms chat formatting, mentions and a live tablist.
