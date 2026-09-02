@@ -56,6 +56,7 @@ public final class PeakPvPPlugin extends JavaPlugin {
             new ArenaGuardModule(this, arenas, kits).enable();
             parties.enable();
             new DuelRequestModule(this, kits, parties).enable();
+            new SeenModule(this).enable();
             lobbyItems = new LobbyItemsModule(this, kits, parties);
             lobbyItems.enable();
             getLogger().info("PeakPvP enabled in world '" + pvpWorld.getName() + "'.");

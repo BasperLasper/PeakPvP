@@ -30,6 +30,9 @@ commands:
   duel:
     description: Challenge a player to a spawn duel
     usage: /duel <player>
+  seen:
+    description: Check when a player was last online
+    usage: /seen <player>
   chatcolor:
     description: Select your VIP default chat colour
     usage: /chatcolor
