@@ -1,5 +1,11 @@
 ## PeakPvP 0.1.0
 
+- PeakPvP now has separate Ranked 1.8 PvP and Ranked Latest PvP queues.
+- Added independent 1.8 ELO and Latest ELO ratings with clear match-result messages.
+- Added personal kit layout editing and copying layouts from Ranked 1.8 to Ranked Latest.
+- Added Quick Match to the Ranked Latest menu and party queue support for both ranked ladders.
+- Updated lobby items, kit menus and the scoreboard to clearly show PvP systems, kills, deaths and both ELO ratings.
+- Preserved unlimited-hit combat for the Combo kit.
 - Added `/seen <player>` to check whether a player is online and when they were last seen.
 - Added a void PvP world with a single bedrock spawn block at 0, 64, 0.
 - Added world block protection and a configurable 100-block no-PvP spawn radius.
