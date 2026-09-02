@@ -1,4 +1,4 @@
-config-version: 2
+config-version: 3
 
 messages:
   prefix: '&b&lPEAK &8» &f'
@@ -37,9 +37,10 @@ scoreboard:
     - '&7Queuing: &f0'
     - '&7Ping: &f<ping>ms'
     - ''
-    - '&7KDR: &f<kills>/<deaths> &b<kdr>'
-    - '&7ELO: &b0'
-    - '&7Streak: &f0'
+    - '&7Kills: &f<kills>'
+    - '&7Deaths: &f<deaths>'
+    - '&71.8 ELO: &e<legacy-elo>'
+    - '&7Latest ELO: &b<latest-elo>'
     - '&7Area: &b<area-color><area>'
     - ''
     - '&7&opeaksmp.us'
@@ -49,13 +50,13 @@ lobby-items:
   unranked:
     slot: 0
     material: IRON_SWORD
-    name: '&a&lUnranked'
-    lore: ['&7Play casual duels.', '', '&eRight-click to open']
+    name: '&e&lRanked 1.8'
+    lore: ['&7Play competitive 1.8 duels.', '&fCombat: &e1.8 PvP', '&fRating: &e1.8 ELO', '', '&eRight-click to open']
   ranked:
     slot: 1
     material: DIAMOND_SWORD
-    name: '&c&lRanked'
-    lore: ['&7Play competitive duels.', '', '&eRight-click to open']
+    name: '&b&lRanked Latest'
+    lore: ['&7Play competitive duels.', '&fCombat: &bLatest PvP', '&fRating: &bLatest ELO', '', '&eRight-click to open']
   party:
     slot: 4
     material: ENDER_EYE

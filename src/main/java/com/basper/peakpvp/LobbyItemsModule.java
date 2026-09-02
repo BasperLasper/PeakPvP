@@ -24,13 +24,14 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Map;
 
 final class LobbyItemsModule implements Listener {
     private static final List<String> ITEM_IDS = List.of("unranked", "ranked", "party", "kit-editor", "settings");
     private static final Map<String, String> DISPLAY_NAMES = Map.of(
-            "unranked", "Unranked",
-            "ranked", "Ranked",
+            "unranked", "Ranked 1.8",
+            "ranked", "Ranked Latest",
             "party", "Create Party",
             "kit-editor", "Kit Editor",
             "settings", "Settings"
@@ -109,6 +110,14 @@ final class LobbyItemsModule implements Listener {
             kits.openUnrankedMenu(event.getPlayer());
             return;
         }
+        if (id.equals("ranked")) {
+            kits.openRankedMenu(event.getPlayer());
+            return;
+        }
+        if (id.equals("kit-editor")) {
+            kits.openKitEditor(event.getPlayer());
+            return;
+        }
         if (id.equals("party")) {
             parties.handleLobby(event.getPlayer());
             return;
@@ -148,7 +157,16 @@ final class LobbyItemsModule implements Listener {
             ItemStack item = new ItemStack(material);
             ItemMeta meta = item.getItemMeta();
             meta.displayName(Messages.legacy(plugin.getConfig().getString(path + "name", DISPLAY_NAMES.get(id))));
-            meta.lore(plugin.getConfig().getStringList(path + "lore").stream().map(Messages::legacy).toList());
+            List<String> lore = new ArrayList<>(plugin.getConfig().getStringList(path + "lore"));
+            if (id.equals("unranked")) {
+                addPvPSystemLore(lore, "&e1.8 PvP");
+                addRatingLore(lore, "&e1.8 ELO");
+            }
+            if (id.equals("ranked")) {
+                addPvPSystemLore(lore, "&bLatest PvP");
+                addRatingLore(lore, "&bLatest ELO");
+            }
+            meta.lore(lore.stream().map(Messages::legacy).toList());
             meta.getPersistentDataContainer().set(itemKey, PersistentDataType.STRING, id);
             meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ADDITIONAL_TOOLTIP);
             item.setItemMeta(meta);
@@ -178,6 +196,19 @@ final class LobbyItemsModule implements Listener {
             case "kit-editor" -> Material.BOOK;
             default -> Material.CLOCK;
         };
+    }
+
+    private void addPvPSystemLore(List<String> lore, String system) {
+        if (lore.stream().anyMatch(line -> line.toLowerCase(java.util.Locale.ROOT).contains("combat:")
+                || line.toLowerCase(java.util.Locale.ROOT).contains("pvp system:"))) return;
+        int blank = lore.indexOf("");
+        lore.add(blank < 0 ? lore.size() : blank, "&fPvP System: " + system);
+    }
+
+    private void addRatingLore(List<String> lore, String rating) {
+        if (lore.stream().anyMatch(line -> line.toLowerCase(java.util.Locale.ROOT).contains("rating:"))) return;
+        int blank = lore.indexOf("");
+        lore.add(blank < 0 ? lore.size() : blank, "&fRating: " + rating);
     }
 
     private boolean isLobbyItem(ItemStack item) { return itemId(item) != null; }

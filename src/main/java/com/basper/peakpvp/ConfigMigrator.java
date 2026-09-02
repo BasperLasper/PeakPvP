@@ -22,10 +22,37 @@ final class ConfigMigrator {
 
     static void upgrade(PeakPvPPlugin plugin) {
         File config = new File(plugin.getDataFolder(), "config.yml");
-        boolean legacySpawn = config.isFile()
-                && YamlConfiguration.loadConfiguration(config).getInt("config-version", 0) < 2;
+        int oldVersion = config.isFile() ? YamlConfiguration.loadConfiguration(config).getInt("config-version", 0) : 0;
+        boolean legacySpawn = config.isFile() && oldVersion < 2;
         upgradeFile(plugin, "config.yml");
         if (legacySpawn) raiseSpawnHeight(plugin, config);
+        if (config.isFile() && oldVersion < 3) updateScoreboardStats(plugin, config);
+    }
+
+    private static void updateScoreboardStats(PeakPvPPlugin plugin, File config) {
+        try (InputStream bundled = plugin.getResource("config.yml")) {
+            if (bundled == null) return;
+            YamlConfiguration defaults = YamlConfiguration.loadConfiguration(new InputStreamReader(bundled, StandardCharsets.UTF_8));
+            YamlConfiguration data = YamlConfiguration.loadConfiguration(config);
+            data.set("scoreboard.lines", defaults.getStringList("scoreboard.lines"));
+            Path original = config.toPath();
+            Path backup = nextBackupPath(original);
+            Files.copy(original, backup, StandardCopyOption.COPY_ATTRIBUTES);
+            Path temporary = original.resolveSibling("config.yml.scoreboard.tmp");
+            try {
+                data.save(temporary.toFile());
+                try {
+                    Files.move(temporary, original, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+                } catch (AtomicMoveNotSupportedException ignored) {
+                    Files.move(temporary, original, StandardCopyOption.REPLACE_EXISTING);
+                }
+            } finally {
+                Files.deleteIfExists(temporary);
+            }
+            plugin.getLogger().info("Scoreboard upgraded with separate kills, deaths and ELO lines. Backup: " + backup.getFileName());
+        } catch (IOException exception) {
+            plugin.getLogger().severe("Could not upgrade scoreboard lines: " + exception.getMessage());
+        }
     }
 
     private static void raiseSpawnHeight(PeakPvPPlugin plugin, File config) {

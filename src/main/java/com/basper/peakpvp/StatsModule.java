@@ -19,6 +19,8 @@ final class StatsModule implements Listener {
     private final YamlConfiguration data;
     private final Map<UUID, Integer> kills = new HashMap<>();
     private final Map<UUID, Integer> deaths = new HashMap<>();
+    private final Map<UUID, Integer> legacyElo = new HashMap<>();
+    private final Map<UUID, Integer> modernElo = new HashMap<>();
 
     StatsModule(PeakPvPPlugin plugin) {
         this.plugin = plugin;
@@ -34,6 +36,24 @@ final class StatsModule implements Listener {
     int kills(Player player) { return kills.getOrDefault(player.getUniqueId(), 0); }
 
     int deaths(Player player) { return deaths.getOrDefault(player.getUniqueId(), 0); }
+
+    int elo(Player player) { return elo(player, true); }
+
+    int elo(Player player, boolean modern) { return elo(player.getUniqueId(), modern); }
+
+    int elo(UUID playerId, boolean modern) { return (modern ? modernElo : legacyElo).getOrDefault(playerId, 1000); }
+
+    int recordRankedResult(UUID winner, UUID loser, boolean modern) {
+        Map<UUID, Integer> ladder = modern ? modernElo : legacyElo;
+        int winnerBefore = elo(winner, modern);
+        int loserBefore = elo(loser, modern);
+        double expectedWinner = 1.0 / (1.0 + Math.pow(10.0, (loserBefore - winnerBefore) / 400.0));
+        int change = Math.max(1, (int) Math.round(32.0 * (1.0 - expectedWinner)));
+        ladder.put(winner, winnerBefore + change);
+        ladder.put(loser, Math.max(0, loserBefore - change));
+        save();
+        return change;
+    }
 
     String kdr(Player player) {
         int deaths = deaths(player);
@@ -61,8 +81,13 @@ final class StatsModule implements Listener {
                 UUID id = UUID.fromString(key);
                 int playerKills = Math.max(0, data.getInt("players." + key + ".kills", 0));
                 int playerDeaths = Math.max(0, data.getInt("players." + key + ".deaths", 0));
+                int latestElo = Math.max(0, data.getInt("players." + key + ".latest-elo",
+                        data.getInt("players." + key + ".elo", 1000)));
+                int legacyRating = Math.max(0, data.getInt("players." + key + ".legacy-elo", 1000));
                 if (playerKills > 0) kills.put(id, playerKills);
                 if (playerDeaths > 0) deaths.put(id, playerDeaths);
+                modernElo.put(id, latestElo);
+                legacyElo.put(id, legacyRating);
             } catch (IllegalArgumentException ignored) { }
         }
     }
@@ -70,6 +95,8 @@ final class StatsModule implements Listener {
     private void save() {
         for (UUID id : kills.keySet()) data.set("players." + id + ".kills", kills.get(id));
         for (UUID id : deaths.keySet()) data.set("players." + id + ".deaths", deaths.get(id));
+        for (UUID id : modernElo.keySet()) data.set("players." + id + ".latest-elo", modernElo.get(id));
+        for (UUID id : legacyElo.keySet()) data.set("players." + id + ".legacy-elo", legacyElo.get(id));
         try {
             file.getParentFile().mkdirs();
             data.save(file);

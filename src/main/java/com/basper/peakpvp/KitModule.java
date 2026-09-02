@@ -13,6 +13,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
@@ -31,6 +33,7 @@ import org.bukkit.command.TabExecutor;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -42,7 +45,10 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.UUID;
 
 final class KitModule implements Listener, TabExecutor {
-    private static final Component MENU_TITLE = Messages.legacy("&0Unranked Kits");
+    private static final Component MENU_TITLE = Messages.legacy("&0Ranked 1.8 Kits &8- &e1.8 ELO");
+    private static final Component RANKED_TITLE = Messages.legacy("&0Ranked Latest Kits &8- &bLatest ELO");
+    private static final Component EDITOR_TITLE = Messages.legacy("&0Kit Editor");
+    private static final Component LAYOUT_TITLE = Messages.legacy("&0Edit Kit Layout");
     private static final int[] KIT_SLOTS = {0, 1, 2, 3, 4, 5, 6, 9, 10, 11, 12, 13, 14, 15};
     private static final int FAST_JOIN_SLOT = 17;
     private static final String FAST_JOIN_ID = "__fast_join__";
@@ -50,34 +56,44 @@ final class KitModule implements Listener, TabExecutor {
     private final ArenaManager arenas;
     private final BlockRollbackModule rollback;
     private final File file;
+    private final File layoutsFile;
+    private final StatsModule stats;
     private final Map<String, List<ItemStack>> kits = new java.util.LinkedHashMap<>();
     private final Map<String, ItemStack[]> armor = new java.util.LinkedHashMap<>();
     private final Map<String, String> displayNames = new java.util.LinkedHashMap<>();
     private final Map<String, Material> icons = new java.util.LinkedHashMap<>();
     private final Map<Integer, String> menuSlots = new java.util.HashMap<>();
     private final Map<String, LinkedHashSet<UUID>> queues = new java.util.LinkedHashMap<>();
+    private final Map<String, LinkedHashSet<UUID>> rankedQueues = new java.util.LinkedHashMap<>();
+    private final Set<UUID> queuedRanked = new HashSet<>();
     private final Map<UUID, String> queuedKits = new java.util.HashMap<>();
     private final Map<UUID, UUID> forcedOpponents = new java.util.HashMap<>();
     private final Map<UUID, Duel> duels = new java.util.HashMap<>();
     private final Set<String> usedArenas = new HashSet<>();
     private final Set<UUID> pendingLobbyReturn = new HashSet<>();
     private final Set<UUID> skipKitVotes = new HashSet<>();
+    private final Map<UUID, String> editingKits = new java.util.HashMap<>();
+    private final Map<String, List<ItemStack>> playerLayouts = new java.util.HashMap<>();
+    private final Map<String, Boolean> modernKits = new java.util.HashMap<>();
     private static final long PVP_ZONE_ROTATION_MILLIS = 5 * 60 * 1000L;
     private String pvpZoneKit;
     private long nextPvpZoneKitAt;
     private PartyModule parties;
 
-    KitModule(PeakPvPPlugin plugin, ArenaManager arenas, BlockRollbackModule rollback) {
+    KitModule(PeakPvPPlugin plugin, ArenaManager arenas, BlockRollbackModule rollback, StatsModule stats) {
         this.plugin = plugin;
         this.arenas = arenas;
         this.rollback = rollback;
+        this.stats = stats;
         this.file = new File(plugin.getDataFolder(), "kits.yml");
+        this.layoutsFile = new File(plugin.getDataFolder(), "kit-layouts.yml");
     }
 
     void enable() {
         if (!file.isFile()) plugin.saveResource("kits.yml", false);
         ConfigMigrator.resetFileIfOlder(plugin, "kits.yml");
         load();
+        loadLayouts();
         pvpZoneKit = randomKit();
         nextPvpZoneKitAt = System.currentTimeMillis() + PVP_ZONE_ROTATION_MILLIS;
         Bukkit.getScheduler().runTaskTimer(plugin, this::rotatePvpZoneKit, 6000L, 6000L);
@@ -94,6 +110,7 @@ final class KitModule implements Listener, TabExecutor {
         armor.clear();
         displayNames.clear();
         icons.clear();
+        modernKits.clear();
         YamlConfiguration data = YamlConfiguration.loadConfiguration(file);
         ConfigurationSection groups = data.getConfigurationSection("kits.unranked");
         if (groups == null) return;
@@ -126,6 +143,7 @@ final class KitModule implements Listener, TabExecutor {
             displayNames.put(id, data.getString(path + ".display-name", "&a" + key));
             Material icon = Material.matchMaterial(data.getString(path + ".icon", "DIAMOND_SWORD"));
             icons.put(id, icon == null || icon.isAir() ? Material.DIAMOND_SWORD : icon);
+            modernKits.put(id, data.getBoolean(path + ".modern-pvp", id.equals("mace") || id.equals("axe-pvp")));
             ItemStack[] kitArmor = new ItemStack[4];
             kitArmor[0] = readItem(data, path + ".armor.boots");
             kitArmor[1] = readItem(data, path + ".armor.leggings");
@@ -152,7 +170,54 @@ final class KitModule implements Listener, TabExecutor {
         player.openInventory(inventory);
     }
 
+    void openRankedMenu(Player player) { openKitMenu(player, true); }
+
+    void openKitEditor(Player player) {
+        Inventory inventory = Bukkit.createInventory(null, 18, EDITOR_TITLE);
+        int index = 0;
+        for (String id : kits.keySet()) {
+            if (index >= KIT_SLOTS.length) break;
+            ItemStack item = new ItemStack(icons.getOrDefault(id, Material.DIAMOND_SWORD));
+            ItemMeta meta = item.getItemMeta();
+            meta.displayName(Messages.legacy(displayNames.getOrDefault(id, "&a" + id)));
+            meta.lore(List.of(Messages.legacy("&7Edit your personal item layout"), Messages.legacy("&eClick to edit")));
+            item.setItemMeta(meta);
+            inventory.setItem(KIT_SLOTS[index++], item);
+        }
+        ItemStack copy = new ItemStack(Material.CHEST);
+        ItemMeta meta = copy.getItemMeta();
+        meta.displayName(Messages.legacy("&a&lCopy all Unranked layouts to Ranked"));
+        meta.lore(List.of(Messages.legacy("&7Ranked and Unranked use the same personal layouts."), Messages.legacy("&eClick to copy all kits")));
+        copy.setItemMeta(meta);
+        inventory.setItem(17, copy);
+        player.openInventory(inventory);
+    }
+
+    private void openKitMenu(Player player, boolean ranked) {
+        if (!player.hasPermission("peakpvp.kit.use")) { plugin.message(player, "You do not have permission to choose a kit."); return; }
+        Inventory inventory = Bukkit.createInventory(null, 18, ranked ? RANKED_TITLE : MENU_TITLE);
+        int index = 0;
+        for (String id : kits.keySet()) {
+            if (index >= KIT_SLOTS.length) break;
+            inventory.setItem(KIT_SLOTS[index++], kitMenuItem(id, ranked));
+        }
+        inventory.setItem(FAST_JOIN_SLOT, fastJoinItem(ranked));
+        player.openInventory(inventory);
+    }
+
     boolean isInDuel(UUID playerId) { return duels.containsKey(playerId); }
+
+    boolean usesLegacyCombat(Player player) {
+        Duel duel = duels.get(player.getUniqueId());
+        if (duel != null) return !duel.ranked() || duel.kit().equals("combo");
+        if (!player.getWorld().equals(plugin.pvpWorld()) || player.getLocation().getY() >= plugin.protectionY()) return false;
+        return pvpZoneKit == null || !modernKits.getOrDefault(pvpZoneKit, false) || pvpZoneKit.equals("combo");
+    }
+
+    String combatName(String kit, boolean ranked) {
+        if ("combo".equals(kit)) return "&dCombo (Unlimited Hits)";
+        return ranked || modernKits.getOrDefault(kit, false) ? "&bLatest PvP" : "&e1.8 PvP";
+    }
 
     boolean isCombo(Player player) {
         Duel duel = duels.get(player.getUniqueId());
@@ -171,7 +236,8 @@ final class KitModule implements Listener, TabExecutor {
         leaveQueue(player.getUniqueId());
         if (pvpZoneKit == null) pvpZoneKit = randomKit();
         equip(player, pvpZoneKit);
-        plugin.message(player, "You entered the PvP Zone. Random kit: " + displayNames.getOrDefault(pvpZoneKit, "&a" + pvpZoneKit) + "&f.");
+        plugin.message(player, "You entered the PvP Zone. Kit: " + displayNames.getOrDefault(pvpZoneKit, "&a" + pvpZoneKit)
+                + " &8| &fCombat: " + combatName(pvpZoneKit, false) + "&f.");
         refreshOpenMenus();
     }
 
@@ -182,13 +248,15 @@ final class KitModule implements Listener, TabExecutor {
         do { pvpZoneKit = randomKit(); } while (kits.size() > 1 && pvpZoneKit.equals(previous));
         nextPvpZoneKitAt = System.currentTimeMillis() + PVP_ZONE_ROTATION_MILLIS;
         plugin.broadcast("&d&lPvP Zone Kit &8» &fThe new random kit is "
-                + displayNames.getOrDefault(pvpZoneKit, "&a" + pvpZoneKit) + "&f. Next change in 5 minutes.");
+                + displayNames.getOrDefault(pvpZoneKit, "&a" + pvpZoneKit) + " &8| &fCombat: " + combatName(pvpZoneKit, false)
+                + "&f. Next change in 5 minutes.");
         for (Player player : Bukkit.getOnlinePlayers()) {
             if (player.getWorld().equals(plugin.pvpWorld()) && player.getLocation().getY() < plugin.protectionY()
                     && !duels.containsKey(player.getUniqueId())) {
                 leaveQueue(player.getUniqueId());
                 equip(player, pvpZoneKit);
-                plugin.message(player, "PvP Zone kit changed to " + displayNames.getOrDefault(pvpZoneKit, "&a" + pvpZoneKit) + "&f.");
+                plugin.message(player, "PvP Zone kit changed to " + displayNames.getOrDefault(pvpZoneKit, "&a" + pvpZoneKit)
+                        + " &8| &fCombat: " + combatName(pvpZoneKit, false) + "&f.");
             }
         }
     }
@@ -203,50 +271,68 @@ final class KitModule implements Listener, TabExecutor {
         long minutes = remaining / 60;
         long seconds = remaining % 60;
         plugin.message(player, "Current PvP Zone kit: " + displayNames.getOrDefault(pvpZoneKit, "&a" + pvpZoneKit)
-                + "&f. Next change in &e" + minutes + "m " + seconds + "s&f.");
+                + " &8| &fCombat: " + combatName(pvpZoneKit, false) + "&f. Next change in &e" + minutes + "m " + seconds + "s&f.");
     }
 
-    private ItemStack kitMenuItem(String id) {
-        int queued = queuedCount(id);
+    private ItemStack kitMenuItem(String id) { return kitMenuItem(id, false); }
+
+    private ItemStack kitMenuItem(String id, boolean ranked) {
+        int queued = queuedCount(id, ranked);
         ItemStack item = new ItemStack(icons.getOrDefault(id, Material.DIAMOND_SWORD), Math.max(1, Math.min(64, queued)));
         ItemMeta meta = item.getItemMeta();
         meta.displayName(Messages.legacy(displayNames.getOrDefault(id, "&a" + id)));
-        meta.lore(List.of(Messages.legacy("&7Unranked kit"), Messages.legacy("&fPlayers queuing: &e" + queued), Messages.legacy(""), Messages.legacy("&eClick to join queue")));
+        meta.lore(List.of(Messages.legacy(ranked ? "&bRanked Latest PvP" : "&eRanked 1.8 PvP"),
+                Messages.legacy(ranked ? "&fRating: &bLatest ELO" : "&fRating: &e1.8 ELO"),
+                Messages.legacy("&fPlayers queuing: &e" + queued), Messages.legacy(""), Messages.legacy("&eClick to join queue")));
         item.setItemMeta(meta);
         return item;
     }
 
     private ItemStack fastJoinItem() {
-        int queued = totalQueued();
+        return fastJoinItem(false);
+    }
+
+    private ItemStack fastJoinItem(boolean ranked) {
+        int queued = totalQueued(ranked);
         ItemStack item = new ItemStack(Material.COMPASS, Math.max(1, Math.min(64, queued)));
         ItemMeta meta = item.getItemMeta();
-        meta.displayName(Messages.legacy("&d&lFast Join"));
-        meta.lore(List.of(Messages.legacy("&7Join a queue with another player"), Messages.legacy("&fPlayers waiting: &e" + queued), Messages.legacy(""), Messages.legacy("&eClick to fast join")));
+        meta.displayName(Messages.legacy(ranked ? "&b&lQuick Match" : "&d&lFast Join"));
+        meta.lore(List.of(Messages.legacy(ranked ? "&7Find a waiting Ranked Latest opponent" : "&7Join a queue with another player"),
+                Messages.legacy(ranked ? "&fPvP System: &bLatest PvP" : "&fPvP System: &e1.8 PvP"),
+                Messages.legacy("&fPlayers waiting: &e" + queued), Messages.legacy(""),
+                Messages.legacy(ranked ? "&eClick to quick match" : "&eClick to fast join")));
         item.setItemMeta(meta);
         return item;
     }
 
     private void queue(Player player, String name) {
+        queue(player, name, false);
+    }
+
+    private void queue(Player player, String name, boolean ranked) {
         String id = name.toLowerCase(Locale.ROOT);
         if (!kits.containsKey(id)) { plugin.message(player, "That kit does not exist."); return; }
         if (duels.containsKey(player.getUniqueId())) { plugin.message(player, "You are already in a duel."); return; }
         if (parties != null) {
             List<UUID> party = parties.membersForQueue(player.getUniqueId());
             if (party.size() == 2) {
-                queueParty(id, party);
+                queueParty(id, party, ranked);
                 return;
             }
         }
         leaveQueue(player.getUniqueId());
-        queues.computeIfAbsent(id, ignored -> new LinkedHashSet<>()).add(player.getUniqueId());
+        (ranked ? rankedQueues : queues).computeIfAbsent(id, ignored -> new LinkedHashSet<>()).add(player.getUniqueId());
         queuedKits.put(player.getUniqueId(), id);
+        if (ranked) queuedRanked.add(player.getUniqueId());
         player.closeInventory();
-        plugin.message(player, "Queued for " + displayNames.getOrDefault(id, "&a" + name) + " &f. Waiting for another player to choose the same kit...");
-        tryStart(id);
+        plugin.message(player, "Queued for " + (ranked ? "&bRanked Latest" : "&eRanked 1.8") + " &f"
+                + displayNames.getOrDefault(id, "&a" + name) + " &8| &fCombat: " + combatName(id, ranked)
+                + " &8| &fELO: &e" + stats.elo(player, ranked) + "&f.");
+        tryStart(id, ranked);
         refreshOpenMenus();
     }
 
-    private void queueParty(String kit, List<UUID> party) {
+    private void queueParty(String kit, List<UUID> party, boolean ranked) {
         List<Player> players = party.stream().map(Bukkit::getPlayer).toList();
         if (players.stream().anyMatch(player -> player == null)) {
             Player player = players.stream().filter(candidate -> candidate != null).findFirst().orElse(null);
@@ -258,16 +344,20 @@ final class KitModule implements Listener, TabExecutor {
             return;
         }
         party.forEach(this::leaveQueue);
-        LinkedHashSet<UUID> queue = queues.computeIfAbsent(kit, ignored -> new LinkedHashSet<>());
+        LinkedHashSet<UUID> queue = (ranked ? rankedQueues : queues).computeIfAbsent(kit, ignored -> new LinkedHashSet<>());
         party.forEach(playerId -> {
             queue.add(playerId);
             queuedKits.put(playerId, kit);
+            if (ranked) queuedRanked.add(playerId);
         });
         players.forEach(player -> {
             player.closeInventory();
-            plugin.message(player, "Your party is queued for " + displayNames.getOrDefault(kit, "&a" + kit) + " &f. You will fight each other when matched.");
+            plugin.message(player, "Your party is queued for " + (ranked ? "&bRanked Latest" : "&eRanked 1.8")
+                    + " &f" + displayNames.getOrDefault(kit, "&a" + kit) + " &8| &fCombat: "
+                    + combatName(kit, ranked) + " &8| &fELO: &e" + stats.elo(player, ranked)
+                    + "&f. You will fight each other when matched.");
         });
-        tryStart(kit);
+        tryStart(kit, ranked);
         refreshOpenMenus();
     }
 
@@ -298,12 +388,13 @@ final class KitModule implements Listener, TabExecutor {
         second.closeInventory();
         plugin.message(first, "Duel accepted. Queued for " + displayNames.getOrDefault(kit, "&a" + kit) + "&f.");
         plugin.message(second, "Duel accepted. Queued for " + displayNames.getOrDefault(kit, "&a" + kit) + "&f.");
-        tryStart(kit);
+        tryStart(kit, false);
         refreshOpenMenus();
     }
 
-    private void tryStart(String kit) {
-        LinkedHashSet<UUID> queue = queues.get(kit);
+    private void tryStart(String kit, boolean ranked) {
+        Map<String, LinkedHashSet<UUID>> queueMap = ranked ? rankedQueues : queues;
+        LinkedHashSet<UUID> queue = queueMap.get(kit);
         if (queue == null) return;
         for (UUID id : new HashSet<>(queue)) if (Bukkit.getPlayer(id) == null) leaveQueue(id);
         while (queue.size() >= 2) {
@@ -350,13 +441,15 @@ final class KitModule implements Listener, TabExecutor {
             queue.remove(secondId);
             queuedKits.remove(firstId);
             queuedKits.remove(secondId);
+            queuedRanked.remove(firstId);
+            queuedRanked.remove(secondId);
             Player first = Bukkit.getPlayer(firstId);
             Player second = Bukkit.getPlayer(secondId);
             if (first == null || second == null) {
                 forcedOpponents.remove(firstId);
                 forcedOpponents.remove(secondId);
-                if (first != null) queue(first, kit);
-                if (second != null) queue(second, kit);
+                if (first != null) queue(first, kit, ranked);
+                if (second != null) queue(second, kit, ranked);
                 continue;
             }
             ArenaManager.Arena arena = findAvailableArena();
@@ -374,17 +467,19 @@ final class KitModule implements Listener, TabExecutor {
             String arenaId = arena.name().toLowerCase(Locale.ROOT);
             usedArenas.add(arenaId);
             rollback.begin(arena);
-            Duel duel = new Duel(firstId, secondId, kit, arenaId);
+            Duel duel = new Duel(firstId, secondId, kit, arenaId, ranked);
             duels.put(firstId, duel);
             duels.put(secondId, duel);
             equip(first, kit);
             equip(second, kit);
             first.teleport(arena.spawn1());
             second.teleport(arena.spawn2());
-            plugin.message(first, "Matched! Your " + displayNames.getOrDefault(kit, "&a" + kit) + " &fduel is starting.");
-            plugin.message(second, "Matched! Your " + displayNames.getOrDefault(kit, "&a" + kit) + " &fduel is starting.");
+            plugin.message(first, "Matched! " + (ranked ? "&bRanked Latest" : "&eRanked 1.8") + " &f"
+                    + displayNames.getOrDefault(kit, "&a" + kit) + " &8| &fCombat: " + combatName(kit, ranked) + "&f.");
+            plugin.message(second, "Matched! " + (ranked ? "&bRanked Latest" : "&eRanked 1.8") + " &f"
+                    + displayNames.getOrDefault(kit, "&a" + kit) + " &8| &fCombat: " + combatName(kit, ranked) + "&f.");
         }
-        if (queue.isEmpty()) queues.remove(kit);
+        if (queue.isEmpty()) queueMap.remove(kit);
     }
 
     private ArenaManager.Arena findAvailableArena() {
@@ -398,10 +493,11 @@ final class KitModule implements Listener, TabExecutor {
     private void leaveQueue(UUID playerId) {
         String oldKit = queuedKits.remove(playerId);
         if (oldKit != null) {
-            LinkedHashSet<UUID> queue = queues.get(oldKit);
+            Map<String, LinkedHashSet<UUID>> queueMap = queuedRanked.remove(playerId) ? rankedQueues : queues;
+            LinkedHashSet<UUID> queue = queueMap.get(oldKit);
             if (queue != null) {
                 queue.remove(playerId);
-                if (queue.isEmpty()) queues.remove(oldKit);
+                if (queue.isEmpty()) queueMap.remove(oldKit);
             }
         }
         UUID partner = forcedOpponents.remove(playerId);
@@ -409,48 +505,67 @@ final class KitModule implements Listener, TabExecutor {
     }
 
     private int queuedCount(String kit) {
-        LinkedHashSet<UUID> queue = queues.get(kit);
+        return queuedCount(kit, false);
+    }
+
+    private int queuedCount(String kit, boolean ranked) {
+        LinkedHashSet<UUID> queue = (ranked ? rankedQueues : queues).get(kit);
         if (queue == null) return 0;
         queue.removeIf(uuid -> Bukkit.getPlayer(uuid) == null);
         return queue.size();
     }
 
     private int totalQueued() {
+        return totalQueued(false);
+    }
+
+    private int totalQueued(boolean ranked) {
         int total = 0;
-        for (String kit : new ArrayList<>(queues.keySet())) total += queuedCount(kit);
+        Map<String, LinkedHashSet<UUID>> queueMap = ranked ? rankedQueues : queues;
+        for (String kit : new ArrayList<>(queueMap.keySet())) total += queuedCount(kit, ranked);
         return total;
     }
 
     private void fastJoin(Player player) {
+        fastJoin(player, false);
+    }
+
+    private void fastJoin(Player player, boolean ranked) {
         UUID playerId = player.getUniqueId();
         String kit = null;
-        for (Map.Entry<String, LinkedHashSet<UUID>> entry : queues.entrySet()) {
-            queuedCount(entry.getKey());
+        Map<String, LinkedHashSet<UUID>> queueMap = ranked ? rankedQueues : queues;
+        for (Map.Entry<String, LinkedHashSet<UUID>> entry : queueMap.entrySet()) {
+            queuedCount(entry.getKey(), ranked);
             boolean hasOther = entry.getValue().stream().anyMatch(uuid -> !uuid.equals(playerId) && Bukkit.getPlayer(uuid) != null);
             if (hasOther) { kit = entry.getKey(); break; }
         }
         if (kit == null) {
-            plugin.message(player, "There are no unranked players waiting to fast join.");
+            plugin.message(player, ranked ? "There are no Ranked Latest players waiting for a quick match."
+                    : "There are no Ranked 1.8 players waiting to fast join.");
             return;
         }
-        queue(player, kit);
+        queue(player, kit, ranked);
     }
 
     private void refreshOpenMenus() {
         for (Player player : Bukkit.getOnlinePlayers()) {
-            if (!player.getOpenInventory().title().equals(MENU_TITLE)) continue;
+            boolean ranked = player.getOpenInventory().title().equals(RANKED_TITLE);
+            if (!ranked && !player.getOpenInventory().title().equals(MENU_TITLE)) continue;
             Inventory inventory = player.getOpenInventory().getTopInventory();
             int index = 0;
             for (String id : kits.keySet()) {
                 if (index >= KIT_SLOTS.length) break;
-                inventory.setItem(KIT_SLOTS[index++], kitMenuItem(id));
+                inventory.setItem(KIT_SLOTS[index++], kitMenuItem(id, ranked));
             }
-            inventory.setItem(FAST_JOIN_SLOT, fastJoinItem());
+            inventory.setItem(FAST_JOIN_SLOT, fastJoinItem(ranked));
         }
     }
 
     private void equip(Player player, String name) {
-        List<ItemStack> contents = kits.get(name.toLowerCase(Locale.ROOT));
+        String kitId = name.toLowerCase(Locale.ROOT);
+        Duel duel = duels.get(player.getUniqueId());
+        boolean rankedLayout = duel != null && duel.ranked();
+        List<ItemStack> contents = playerLayouts.getOrDefault(layoutKey(player.getUniqueId(), rankedLayout, kitId), kits.get(kitId));
         if (contents == null) { plugin.message(player, "That kit does not exist."); return; }
         player.getInventory().clear();
         for (PotionEffect effect : player.getActivePotionEffects()) player.removePotionEffect(effect.getType());
@@ -458,7 +573,7 @@ final class KitModule implements Listener, TabExecutor {
             ItemStack item = contents.get(slot);
             if (item != null) player.getInventory().setItem(slot, item.clone());
         }
-        ItemStack[] kitArmor = armor.get(name.toLowerCase(Locale.ROOT));
+        ItemStack[] kitArmor = armor.get(kitId);
         if (kitArmor != null) {
             ItemStack[] cloned = new ItemStack[4];
             for (int index = 0; index < cloned.length; index++) cloned[index] = kitArmor[index] == null ? null : kitArmor[index].clone();
@@ -469,6 +584,69 @@ final class KitModule implements Listener, TabExecutor {
         player.setFoodLevel(20);
         player.setSaturation(20);
         player.updateInventory();
+    }
+
+    private void openLayoutEditor(Player player, String kit) {
+        editingKits.put(player.getUniqueId(), kit);
+        Inventory inventory = Bukkit.createInventory(null, 36, LAYOUT_TITLE);
+        List<ItemStack> contents = playerLayouts.getOrDefault(layoutKey(player.getUniqueId(), false, kit), kits.get(kit));
+        for (int slot = 0; slot < 36; slot++) {
+            ItemStack item = contents.get(slot);
+            if (item != null) inventory.setItem(slot, item.clone());
+        }
+        player.openInventory(inventory);
+        plugin.message(player, "Editing your " + displayNames.getOrDefault(kit, "&a" + kit)
+                + " &flayout. Move items, then close the inventory to save.");
+    }
+
+    private String layoutKey(UUID player, boolean ranked, String kit) {
+        return player + "." + (ranked ? "ranked" : "unranked") + "." + kit;
+    }
+
+    private void loadLayouts() {
+        playerLayouts.clear();
+        YamlConfiguration data = YamlConfiguration.loadConfiguration(layoutsFile);
+        ConfigurationSection section = data.getConfigurationSection("layouts");
+        if (section == null) return;
+        for (String player : section.getKeys(false)) {
+            for (String mode : List.of("unranked", "ranked")) {
+                ConfigurationSection kitSection = data.getConfigurationSection("layouts." + player + "." + mode);
+                if (kitSection == null) continue;
+                for (String kit : kitSection.getKeys(false)) {
+                    List<?> stored = data.getList("layouts." + player + "." + mode + "." + kit);
+                    if (stored == null) continue;
+                    List<ItemStack> contents = new ArrayList<>();
+                    for (int slot = 0; slot < 36; slot++) {
+                        Object value = slot < stored.size() ? stored.get(slot) : null;
+                        contents.add(value instanceof ItemStack item ? item : null);
+                    }
+                    playerLayouts.put(player + "." + mode + "." + kit, contents);
+                }
+            }
+        }
+    }
+
+    private void saveLayouts() {
+        YamlConfiguration data = new YamlConfiguration();
+        playerLayouts.forEach((key, value) -> data.set("layouts." + key, value));
+        try {
+            layoutsFile.getParentFile().mkdirs();
+            data.save(layoutsFile);
+        } catch (IOException exception) {
+            plugin.getLogger().warning("Could not save kit-layouts.yml: " + exception.getMessage());
+        }
+    }
+
+    private void copyLayoutsToRanked(Player player) {
+        for (String kit : kits.keySet()) {
+            List<ItemStack> source = playerLayouts.getOrDefault(layoutKey(player.getUniqueId(), false, kit), kits.get(kit));
+            List<ItemStack> copy = new ArrayList<>();
+            for (ItemStack item : source) copy.add(item == null ? null : item.clone());
+            playerLayouts.put(layoutKey(player.getUniqueId(), true, kit), copy);
+        }
+        saveLayouts();
+        player.closeInventory();
+        plugin.message(player, "Copied all of your Unranked kit layouts to Ranked.");
     }
 
     private ItemStack readItem(YamlConfiguration data, String path) {
@@ -576,17 +754,55 @@ final class KitModule implements Listener, TabExecutor {
     }
 
     @EventHandler(priority = EventPriority.HIGHEST) public void click(InventoryClickEvent event) {
-        if (!event.getView().title().equals(MENU_TITLE)) return;
-        event.setCancelled(true);
         if (!(event.getWhoClicked() instanceof Player player)) return;
-        String kit = menuSlots.get(event.getRawSlot());
-        if (FAST_JOIN_ID.equals(kit)) fastJoin(player);
-        else if (kit != null) queue(player, kit);
+        Component title = event.getView().title();
+        if (title.equals(LAYOUT_TITLE)) {
+            if (event.getRawSlot() >= event.getView().getTopInventory().getSize() || event.isShiftClick()) event.setCancelled(true);
+            return;
+        }
+        if (!title.equals(MENU_TITLE) && !title.equals(RANKED_TITLE) && !title.equals(EDITOR_TITLE)) return;
+        event.setCancelled(true);
+        if (title.equals(EDITOR_TITLE) && event.getRawSlot() == 17) { copyLayoutsToRanked(player); return; }
+        String kit = kitAtMenuSlot(event.getRawSlot());
+        if (title.equals(EDITOR_TITLE)) {
+            if (kit != null) openLayoutEditor(player, kit);
+        } else if (title.equals(RANKED_TITLE)) {
+            if (event.getRawSlot() == FAST_JOIN_SLOT) fastJoin(player, true);
+            else if (kit != null) queue(player, kit, true);
+        } else if (event.getRawSlot() == FAST_JOIN_SLOT) fastJoin(player);
+        else if (kit != null) queue(player, kit, false);
+    }
+
+    @EventHandler public void close(InventoryCloseEvent event) {
+        if (!event.getView().title().equals(LAYOUT_TITLE) || !(event.getPlayer() instanceof Player player)) return;
+        String kit = editingKits.remove(player.getUniqueId());
+        if (kit == null) return;
+        List<ItemStack> contents = new ArrayList<>();
+        for (ItemStack item : event.getInventory().getContents()) contents.add(item == null ? null : item.clone());
+        playerLayouts.put(layoutKey(player.getUniqueId(), false, kit), contents);
+        player.setItemOnCursor(null);
+        saveLayouts();
+        plugin.message(player, "Saved your " + displayNames.getOrDefault(kit, "&a" + kit) + " &fUnranked layout.");
+        Bukkit.getScheduler().runTask(plugin, () -> plugin.refreshLobbyItems(player));
+    }
+
+    @EventHandler public void drag(InventoryDragEvent event) {
+        if (!event.getView().title().equals(LAYOUT_TITLE)) return;
+        int topSize = event.getView().getTopInventory().getSize();
+        if (event.getRawSlots().stream().anyMatch(slot -> slot >= topSize)) event.setCancelled(true);
+    }
+
+    private String kitAtMenuSlot(int slot) {
+        for (int index = 0; index < KIT_SLOTS.length && index < kits.size(); index++) {
+            if (KIT_SLOTS[index] == slot) return new ArrayList<>(kits.keySet()).get(index);
+        }
+        return null;
     }
 
     @EventHandler public void quit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
-        if (player.getOpenInventory().title().equals(MENU_TITLE)) player.closeInventory();
+        if (player.getOpenInventory().title().equals(MENU_TITLE) || player.getOpenInventory().title().equals(RANKED_TITLE)
+                || player.getOpenInventory().title().equals(EDITOR_TITLE)) player.closeInventory();
         leaveQueue(player.getUniqueId());
         skipKitVotes.remove(player.getUniqueId());
         refreshOpenMenus();
@@ -598,9 +814,12 @@ final class KitModule implements Listener, TabExecutor {
         rollback.end(arenas.get(duel.arena()));
         Player opponent = Bukkit.getPlayer(opponentId);
         if (opponent != null) {
+            int eloChange = stats.recordRankedResult(opponentId, player.getUniqueId(), duel.ranked());
             plugin.broadcast("&c" + opponent.getName() + " &awon the " + displayNames.getOrDefault(duel.kit(), "&a" + duel.kit())
                     + " &amatch against &c" + player.getName() + "&a.");
             plugin.message(opponent, "You won the duel because your opponent left.");
+            plugin.message(opponent, (duel.ranked() ? "Latest" : "1.8") + " ranked result: &a+" + eloChange
+                    + " ELO &8(&e" + stats.elo(opponent, duel.ranked()) + "&8)&f.");
             returnToLobby(opponent);
         }
     }
@@ -622,9 +841,15 @@ final class KitModule implements Listener, TabExecutor {
         pendingLobbyReturn.add(loser.getUniqueId());
         Player winner = Bukkit.getPlayer(winnerId);
         if (winner != null) {
+            int eloChange = stats.recordRankedResult(winnerId, loser.getUniqueId(), duel.ranked());
             plugin.broadcast("&c" + winner.getName() + " &awon the " + displayNames.getOrDefault(duel.kit(), "&a" + duel.kit())
                     + " &amatch against &c" + loser.getName() + "&a.");
             plugin.message(winner, "You won the " + displayNames.getOrDefault(duel.kit(), "&a" + duel.kit()) + " duel!");
+            String ladder = duel.ranked() ? "Latest" : "1.8";
+            plugin.message(winner, ladder + " ranked result: &a+" + eloChange + " ELO &8(&e"
+                    + stats.elo(winner, duel.ranked()) + "&8)&f.");
+            plugin.message(loser, ladder + " ranked result: &c-" + eloChange + " ELO &8(&e"
+                    + stats.elo(loser, duel.ranked()) + "&8)&f.");
             returnToLobby(winner);
         }
         plugin.message(loser, "You lost the " + displayNames.getOrDefault(duel.kit(), "&a" + duel.kit()) + " duel.");
@@ -655,7 +880,7 @@ final class KitModule implements Listener, TabExecutor {
         plugin.refreshLobbyItems(player);
     }
 
-    private record Duel(UUID first, UUID second, String kit, String arena) {
+    private record Duel(UUID first, UUID second, String kit, String arena, boolean ranked) {
         UUID opponent(UUID player) { return first.equals(player) ? second : first; }
     }
 

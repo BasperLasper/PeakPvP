@@ -48,7 +48,7 @@ public final class PeakPvPPlugin extends JavaPlugin {
             StatsModule stats = new StatsModule(this);
             stats.enable();
             new ScoreboardModule(this, social, stats).enable();
-            kits = new KitModule(this, arenas, rollback);
+            kits = new KitModule(this, arenas, rollback, stats);
             new CombatModule(this, kits).enable();
             PartyModule parties = new PartyModule(this, kits);
             kits.setPartyModule(parties);

@@ -178,6 +178,7 @@ kits:
         helmet: {material: IRON_HELMET}
     axe-pvp:
       display-name: '&cAxe PvP'
+      modern-pvp: true
       icon: DIAMOND_AXE
       items:
         '0': {material: DIAMOND_AXE, amount: 1, enchantments: {sharpness: 2}}
@@ -189,6 +190,7 @@ kits:
         helmet: {material: IRON_HELMET, enchantments: {unbreaking: 3, protection: 2}}
     mace:
       display-name: '&5Mace'
+      modern-pvp: true
       icon: MACE
       items:
         '0': {material: NETHERITE_SWORD, amount: 1, enchantments: {unbreaking: 3, sharpness: 5}}
