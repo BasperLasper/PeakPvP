@@ -1,0 +1,41 @@
+name: Build and update
+on:
+  push:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "9.2.1"
+      - name: Build PeakPvP
+        run: gradle clean build --console=plain
+      - uses: actions/upload-artifact@v4
+        with:
+          name: PeakPvP-${{ github.sha }}
+          path: build/libs/*.jar
+      - name: Send compact public update
+        if: github.event_name == 'push'
+        shell: pwsh
+        env:
+          PEAKPVP_UPDATE_WEBHOOK: ${{ secrets.PEAKPVP_UPDATE_WEBHOOK }}
+        run: |
+          $event = Get-Content -LiteralPath $env:GITHUB_EVENT_PATH -Raw | ConvertFrom-Json
+          $updates = @()
+          if ($event.before -and [string]$event.before -notmatch '^0+$') {
+            $updates = @(git diff --unified=0 $event.before $env:GITHUB_SHA -- PUBLIC_CHANGELOG.md |
+              ForEach-Object { if ($_ -match '^\+\-\s+(.+)$') { $Matches[1].Trim() } } |
+              Where-Object { $_ } | Select-Object -Unique)
+          }
+          if ($updates.Count -eq 0) { $updates = @($event.head_commit.message) }
+          ./scripts/send-update.ps1 -Message ($updates -join "`n")

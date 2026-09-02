@@ -1,5 +1,6 @@
 ## PeakPvP 0.1.0
 
+- PeakPvP update: two ranked ladders are now live—Ranked 1.8 with 1.8 ELO and Ranked Latest with Latest ELO—plus editable kit layouts, Ranked Quick Match, party queueing for both modes, improved scoreboard stats, and unlimited-hit Combo combat.
 - PeakPvP now has separate Ranked 1.8 PvP and Ranked Latest PvP queues.
 - Added independent 1.8 ELO and Latest ELO ratings with clear match-result messages.
 - Added personal kit layout editing and copying layouts from Ranked 1.8 to Ranked Latest.
