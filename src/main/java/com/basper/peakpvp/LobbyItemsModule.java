@@ -28,10 +28,11 @@ import java.util.ArrayList;
 import java.util.Map;
 
 final class LobbyItemsModule implements Listener {
-    private static final List<String> ITEM_IDS = List.of("unranked", "ranked", "party", "kit-editor", "settings");
+    private static final List<String> ITEM_IDS = List.of("unranked", "ranked", "quick-join", "party", "kit-editor", "settings");
     private static final Map<String, String> DISPLAY_NAMES = Map.of(
             "unranked", "Ranked 1.8",
             "ranked", "Ranked Latest",
+            "quick-join", "Quick Join",
             "party", "Create Party",
             "kit-editor", "Kit Editor",
             "settings", "Settings"
@@ -76,6 +77,11 @@ final class LobbyItemsModule implements Listener {
 
     @EventHandler public void move(PlayerMoveEvent event) {
         if (event.getTo() == null || event.getFrom().getWorld() == null || event.getTo().getWorld() == null) return;
+        if (!kits.isInDuel(event.getPlayer().getUniqueId())
+                && !insideSpawnReturnZone(event.getFrom()) && insideSpawnReturnZone(event.getTo())) {
+            plugin.sendToSpawn(event.getPlayer(), true);
+            return;
+        }
         boolean wasInLobby = insideSpawn(event.getFrom());
         boolean isInLobby = insideSpawn(event.getTo());
         boolean wasInPvpZone = isPvpZone(event.getFrom());
@@ -112,6 +118,10 @@ final class LobbyItemsModule implements Listener {
         }
         if (id.equals("ranked")) {
             kits.openRankedMenu(event.getPlayer());
+            return;
+        }
+        if (id.equals("quick-join")) {
+            kits.quickJoinAny(event.getPlayer());
             return;
         }
         if (id.equals("kit-editor")) {
@@ -188,10 +198,20 @@ final class LobbyItemsModule implements Listener {
         return location.getX() * location.getX() + location.getZ() * location.getZ() <= radius * radius;
     }
 
+    private boolean insideSpawnReturnZone(org.bukkit.Location location) {
+        org.bukkit.Location spawn = plugin.spawn();
+        if (location.getWorld() == null || !location.getWorld().equals(spawn.getWorld())
+                || location.getBlockY() != spawn.getBlockY()) return false;
+        double x = location.getX() - spawn.getX();
+        double z = location.getZ() - spawn.getZ();
+        return x * x + z * z <= 25.0;
+    }
+
     private Material defaultMaterial(String id) {
         return switch (id) {
             case "unranked" -> Material.IRON_SWORD;
             case "ranked" -> Material.DIAMOND_SWORD;
+            case "quick-join" -> Material.COMPASS;
             case "party" -> Material.ENDER_EYE;
             case "kit-editor" -> Material.BOOK;
             default -> Material.CLOCK;

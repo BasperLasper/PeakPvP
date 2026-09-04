@@ -1,4 +1,4 @@
-config-version: 3
+config-version: 4
 
 messages:
   prefix: '&b&lPEAK &8» &f'
@@ -12,6 +12,10 @@ world:
 spawn-build:
   enabled: true
   duration-seconds: 60
+
+arena-rules:
+  allow-block-breaking: false
+  allow-fire-spread: false
 
 chat:
   format: '<prefix>&f<name><suffix> &8» &f<message>'
@@ -57,6 +61,11 @@ lobby-items:
     material: DIAMOND_SWORD
     name: '&b&lRanked Latest'
     lore: ['&7Play competitive duels.', '&fCombat: &bLatest PvP', '&fRating: &bLatest ELO', '', '&eRight-click to open']
+  quick-join:
+    slot: 2
+    material: COMPASS
+    name: '&d&lQuick Join'
+    lore: ['&7Wait for either matchmaking mode.', '&fJoins the first kit another player selects.', '', '&eRight-click to queue']
   party:
     slot: 4
     material: ENDER_EYE

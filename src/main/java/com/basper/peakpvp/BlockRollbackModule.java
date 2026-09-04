@@ -1,17 +1,29 @@
 package com.basper.peakpvp;
 
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
+import org.bukkit.block.data.BlockData;
+import org.bukkit.block.data.Waterlogged;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockBurnEvent;
 import org.bukkit.event.block.BlockFromToEvent;
 import org.bukkit.event.block.BlockMultiPlaceEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.block.BlockSpreadEvent;
+import org.bukkit.event.block.BlockExplodeEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
+import org.bukkit.event.entity.EntityChangeBlockEvent;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.entity.Player;
+import org.bukkit.entity.minecart.ExplosiveMinecart;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerBucketEmptyEvent;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -72,6 +84,48 @@ final class BlockRollbackModule implements Listener {
         else if (temporaryChanges.containsKey(event.getBlock().getLocation())) removeTemporary(event.getBlock().getLocation(), false);
     }
 
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void fireSpread(BlockSpreadEvent event) {
+        if (event.getSource().getType() != Material.FIRE || !canEdit(event.getBlock().getLocation())) return;
+        if (!plugin.getConfig().getBoolean("arena-rules.allow-fire-spread", false)) event.setCancelled(true);
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void emptyBucket(PlayerBucketEmptyEvent event) {
+        Block target = event.getBlockClicked().getRelative(event.getBlockFace());
+        if (canEdit(target.getLocation())) remember(target.getState(), target);
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void entityExplosion(EntityExplodeEvent event) {
+        event.blockList().removeIf(block -> canEdit(block.getLocation()));
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void blockExplosion(BlockExplodeEvent event) {
+        event.blockList().removeIf(block -> canEdit(block.getLocation()));
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void blockBurn(BlockBurnEvent event) {
+        if (canEdit(event.getBlock().getLocation())) event.setCancelled(true);
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void entityChangeBlock(EntityChangeBlockEvent event) {
+        if (canEdit(event.getBlock().getLocation())) event.setCancelled(true);
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void hitTntMinecart(EntityDamageByEntityEvent event) {
+        if (!(event.getEntity() instanceof ExplosiveMinecart minecart)
+                || !(event.getDamager() instanceof Player player)
+                || !player.getInventory().getItemInMainHand().getType().name().endsWith("_SWORD")
+                || !canEdit(minecart.getLocation())) return;
+        event.setCancelled(true);
+        minecart.explode();
+    }
+
     @EventHandler public void death(PlayerDeathEvent event) { removeTemporary(event.getEntity().getUniqueId(), true); }
 
     @EventHandler public void quit(PlayerQuitEvent event) { removeTemporary(event.getPlayer().getUniqueId(), true); }
@@ -92,8 +146,36 @@ final class BlockRollbackModule implements Listener {
         String arenaKey = key(arena);
         activeArenas.remove(arenaKey);
         Map<Location, TrackedChange> arenaChanges = changes.remove(arenaKey);
-        if (arenaChanges == null) return;
-        for (TrackedChange change : arenaChanges.values()) change.original().update(true, false);
+        if (arenaChanges != null) {
+            for (TrackedChange change : arenaChanges.values()) change.original().update(true, false);
+        }
+        removeLiquids(arena);
+    }
+
+    private void removeLiquids(ArenaManager.Arena arena) {
+        if (arena.corner1().getWorld() == null) return;
+        int minX = Math.min(arena.corner1().getBlockX(), arena.corner2().getBlockX());
+        int maxX = Math.max(arena.corner1().getBlockX(), arena.corner2().getBlockX());
+        int minY = Math.min(arena.corner1().getBlockY(), arena.corner2().getBlockY());
+        int maxY = Math.max(arena.corner1().getBlockY(), arena.corner2().getBlockY());
+        int minZ = Math.min(arena.corner1().getBlockZ(), arena.corner2().getBlockZ());
+        int maxZ = Math.max(arena.corner1().getBlockZ(), arena.corner2().getBlockZ());
+        for (int x = minX; x <= maxX; x++) {
+            for (int y = minY; y <= maxY; y++) {
+                for (int z = minZ; z <= maxZ; z++) {
+                    Block block = arena.corner1().getWorld().getBlockAt(x, y, z);
+                    if (block.getType() == Material.WATER || block.getType() == Material.LAVA) {
+                        block.setType(Material.AIR, false);
+                        continue;
+                    }
+                    BlockData data = block.getBlockData();
+                    if (data instanceof Waterlogged waterlogged && waterlogged.isWaterlogged()) {
+                        waterlogged.setWaterlogged(false);
+                        block.setBlockData(waterlogged, false);
+                    }
+                }
+            }
+        }
     }
 
     private void remember(BlockState original, Block block) {

@@ -12,10 +12,15 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
+
 public final class PeakPvPPlugin extends JavaPlugin {
     private World pvpWorld;
     private LobbyItemsModule lobbyItems;
     private KitModule kits;
+    private final Set<UUID> spawnTeleports = new HashSet<>();
 
     @Override public void onEnable() {
         saveDefaultConfig();
@@ -33,11 +38,6 @@ public final class PeakPvPPlugin extends JavaPlugin {
             arenas.load();
             BlockRollbackModule rollback = new BlockRollbackModule(this, arenas);
             rollback.enable();
-            AdminCommand admin = new AdminCommand(this, arenas);
-            PluginCommand adminCommand = requireCommand("peakpvp");
-            adminCommand.setExecutor(admin);
-            adminCommand.setTabCompleter(admin);
-            getServer().getPluginManager().registerEvents(admin, this);
             WorldProtection protection = new WorldProtection(this, rollback);
             protection.enable();
             ColorModule colors = new ColorModule(this);
@@ -49,10 +49,15 @@ public final class PeakPvPPlugin extends JavaPlugin {
             stats.enable();
             new ScoreboardModule(this, social, stats).enable();
             kits = new KitModule(this, arenas, rollback, stats);
+            kits.enable();
+            AdminCommand admin = new AdminCommand(this, arenas, kits);
+            PluginCommand adminCommand = requireCommand("peakpvp");
+            adminCommand.setExecutor(admin);
+            adminCommand.setTabCompleter(admin);
+            getServer().getPluginManager().registerEvents(admin, this);
             new CombatModule(this, kits).enable();
             PartyModule parties = new PartyModule(this, kits);
             kits.setPartyModule(parties);
-            kits.enable();
             new ArenaGuardModule(this, arenas, kits).enable();
             parties.enable();
             new DuelRequestModule(this, kits, parties).enable();
@@ -77,19 +82,23 @@ public final class PeakPvPPlugin extends JavaPlugin {
                 message(player, "You cannot use &c/spawn&f while you are in an arena duel.");
                 return true;
             }
-            if (kits != null) kits.cancelQueue(player.getUniqueId());
-            player.getInventory().clear();
-            player.teleportAsync(spawn()).thenAccept(success -> {
-            if (!success) return;
-                getServer().getScheduler().runTask(this, () -> {
-                    player.getInventory().clear();
-                    resetPlayerVitals(player);
-                    refreshLobbyItems(player);
-                    message(player, "Teleported to spawn.");
-                });
-            });
+            sendToSpawn(player, true);
             return true;
         });
+    }
+
+    void sendToSpawn(org.bukkit.entity.Player player, boolean showMessage) {
+        if (!spawnTeleports.add(player.getUniqueId())) return;
+        if (kits != null) kits.cancelQueue(player.getUniqueId());
+        player.getInventory().clear();
+        player.teleportAsync(spawn()).whenComplete((success, error) -> getServer().getScheduler().runTask(this, () -> {
+            spawnTeleports.remove(player.getUniqueId());
+            if (error != null || !Boolean.TRUE.equals(success) || !player.isOnline()) return;
+            player.getInventory().clear();
+            resetPlayerVitals(player);
+            refreshLobbyItems(player);
+            if (showMessage) message(player, "Teleported to spawn.");
+        }));
     }
 
     private PluginCommand requireCommand(String name) {

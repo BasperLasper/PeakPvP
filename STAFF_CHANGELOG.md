@@ -1,5 +1,17 @@
 ## PeakPvP 0.1.0
 
+- Added `arena-rules.allow-block-breaking` and `arena-rules.allow-fire-spread`, both disabled by default.
+- Protected active arenas from entity/block explosions, block burning, and entity-driven block changes while retaining combat damage and knockback.
+- Added sword-triggered TNT minecart detonation for Cart kit combat.
+- Added bucket-source tracking and a final arena sweep that removes water, lava, and waterlogged states after matches.
+- Added `/peakpvp setup` with per-map kit toggles, one-map kit restriction, unrestricted reset, persistent access rules, and kit-aware random arena allocation.
+- Setup selections clear after arena creation; arena info reports kit access; reload refreshes arenas and kits; `/ppreload` routing was corrected.
+- Added Spear Mace, Cart, and OP Cart inventories and raised `kits.yml` to config version 5.
+- Expanded kit and layout menus to 27 slots and converted existing bottled potions to splash potions.
+- Added a lobby Quick Join compass and cross-mode solo queue for whichever 1.8 or Latest kit another player selects first.
+- Added a five-block, same-Y spawn return zone using the shared asynchronous `/spawn` flow.
+- Updated the Paper and plugin API target to 1.21.11 and documented the separately installed Attribute Swap Fixer dependency.
+
 - Added the `/seen <player>` command using Paper's persisted offline-player last-seen data.
 - Created the Paper 1.21.8 and Java 21 Gradle project foundation.
 - Added startup-safe void-world creation and the `PeakPvP` chunk generator.

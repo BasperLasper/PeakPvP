@@ -1,6 +1,8 @@
 .gradle/
 build/
 *.log
+bin/
+server-plugins/
 
 # Webhooks and secret-bearing environment files
 .env

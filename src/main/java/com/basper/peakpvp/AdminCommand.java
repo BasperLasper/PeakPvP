@@ -1,5 +1,7 @@
 package com.basper.peakpvp;
 
+import net.kyori.adventure.text.Component;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -10,7 +12,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
@@ -18,29 +23,47 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 final class AdminCommand implements TabExecutor, Listener {
     private static final String PERMISSION = "peakpvp.admin.arena";
+    private static final Component MAPS_TITLE = Messages.legacy("&0Arena Map Setup");
+    private static final Component KITS_TITLE = Messages.legacy("&0Map Kit Access");
     private final PeakPvPPlugin plugin;
     private final ArenaManager arenas;
+    private final KitModule kits;
     private final NamespacedKey wandKey;
+    private final NamespacedKey arenaKey;
+    private final NamespacedKey kitKey;
     private final Map<UUID, Selection> selections = new HashMap<>();
+    private final Map<UUID, String> editingArena = new HashMap<>();
 
-    AdminCommand(PeakPvPPlugin plugin, ArenaManager arenas) {
+    AdminCommand(PeakPvPPlugin plugin, ArenaManager arenas, KitModule kits) {
         this.plugin = plugin;
         this.arenas = arenas;
+        this.kits = kits;
         this.wandKey = new NamespacedKey(plugin, "arena_wand");
+        this.arenaKey = new NamespacedKey(plugin, "setup_arena");
+        this.kitKey = new NamespacedKey(plugin, "setup_kit");
     }
 
     @Override public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String @NotNull [] args) {
-        if (args.length == 0 || args[0].equalsIgnoreCase("help") || args[0].equalsIgnoreCase("setup")) {
+        if (label.equalsIgnoreCase("ppreload") && args.length == 0) return reload(sender);
+        if (args.length == 0 || args[0].equalsIgnoreCase("help")) {
             help(sender);
             return true;
         }
-        if (args[0].equalsIgnoreCase("reload") || (label.equalsIgnoreCase("ppreload") && args.length == 0)) return reload(sender);
+        if (args[0].equalsIgnoreCase("setup")) {
+            if (!sender.hasPermission(PERMISSION)) { plugin.message(sender, "You do not have permission to manage arenas."); return true; }
+            if (!(sender instanceof Player player)) { plugin.message(sender, "Map setup must be opened in game."); return true; }
+            openMapSetup(player);
+            return true;
+        }
+        if (args[0].equalsIgnoreCase("reload")) return reload(sender);
         if (!args[0].equalsIgnoreCase("arena") && !args[0].equalsIgnoreCase("area")) {
             plugin.message(sender, "Unknown option. Use &c/peakpvp help&f.");
             return true;
@@ -74,6 +97,7 @@ final class AdminCommand implements TabExecutor, Listener {
         ConfigMigrator.upgrade(plugin);
         plugin.reloadConfig();
         arenas.load();
+        kits.load();
         plugin.message(sender, "Configuration and arenas reloaded successfully.");
         return true;
     }
@@ -105,6 +129,7 @@ final class AdminCommand implements TabExecutor, Listener {
         if (selection == null || selection.first == null || selection.second == null) { plugin.message(player, "Select both corners first with &c/peakpvp arena wand&f."); return true; }
         if (!selection.first.getWorld().equals(selection.second.getWorld())) { plugin.message(player, "Both corners must be in the same world."); return true; }
         if (!arenas.create(args[2], selection.first, selection.second)) { plugin.message(player, "An arena named &c" + args[2] + " &falready exists."); return true; }
+        selections.remove(player.getUniqueId());
         plugin.message(player, "Created arena &c" + args[2] + "&f. Now stand at each player start and use:");
         player.sendMessage(Messages.legacy("&8 • &c/peakpvp arena setspawn " + args[2] + " 1"));
         player.sendMessage(Messages.legacy("&8 • &c/peakpvp arena setspawn " + args[2] + " 2"));
@@ -137,7 +162,119 @@ final class AdminCommand implements TabExecutor, Listener {
         sender.sendMessage(Messages.legacy("&8 • &fCorner 2: &c" + coords(arena.corner2())));
         sender.sendMessage(Messages.legacy("&8 • &fSpawn 1: " + (arena.spawn1() == null ? "&cNOT SET" : "&a" + coords(arena.spawn1()))));
         sender.sendMessage(Messages.legacy("&8 • &fSpawn 2: " + (arena.spawn2() == null ? "&cNOT SET" : "&a" + coords(arena.spawn2()))));
+        sender.sendMessage(Messages.legacy("&8 • &fKits: " + (arena.allowedKits() == null ? "&aALL" : "&e" + arena.allowedKits().size() + " selected")));
         return true;
+    }
+
+    private void openMapSetup(Player player) {
+        Inventory inventory = Bukkit.createInventory(null, 54, MAPS_TITLE);
+        int slot = 0;
+        for (ArenaManager.Arena arena : arenas.all()) {
+            if (slot >= 45) break;
+            ItemStack item = new ItemStack(arena.ready() ? Material.GRASS_BLOCK : Material.RED_CONCRETE);
+            ItemMeta meta = item.getItemMeta();
+            meta.displayName(Messages.legacy("&c&l" + arena.name()));
+            String access = arena.allowedKits() == null ? "&aAll kits" : "&e" + arena.allowedKits().size() + " selected kit(s)";
+            meta.lore(List.of(Messages.legacy(arena.ready() ? "&aReady" : "&cSetup incomplete"),
+                    Messages.legacy("&fMap access: " + access), Messages.legacy(""),
+                    Messages.legacy("&eClick to configure kits")));
+            meta.getPersistentDataContainer().set(arenaKey, PersistentDataType.STRING, arena.name());
+            item.setItemMeta(meta);
+            inventory.setItem(slot++, item);
+        }
+        ItemStack help = new ItemStack(Material.BLAZE_ROD);
+        ItemMeta helpMeta = help.getItemMeta();
+        helpMeta.displayName(Messages.legacy("&e&lCreate another map"));
+        helpMeta.lore(List.of(Messages.legacy("&7Use &f/peakpvp arena wand"),
+                Messages.legacy("&7then &f/peakpvp arena create <name>")));
+        help.setItemMeta(helpMeta);
+        inventory.setItem(49, help);
+        player.openInventory(inventory);
+    }
+
+    private void openKitAccess(Player player, String arenaName) {
+        ArenaManager.Arena arena = arenas.get(arenaName);
+        if (arena == null) { plugin.message(player, "That arena no longer exists."); openMapSetup(player); return; }
+        editingArena.put(player.getUniqueId(), arena.name());
+        Inventory inventory = Bukkit.createInventory(null, 54, KITS_TITLE);
+        int slot = 0;
+        for (String id : kits.kitIds()) {
+            if (slot >= 45) break;
+            boolean allowed = arena.allowsKit(id);
+            ItemStack item = new ItemStack(kits.icon(id));
+            ItemMeta meta = item.getItemMeta();
+            meta.displayName(Messages.legacy((allowed ? "&a&l" : "&c&l") + kits.displayName(id)));
+            meta.lore(List.of(Messages.legacy(allowed ? "&aAllowed on this map" : "&cBlocked on this map"),
+                    Messages.legacy(""), Messages.legacy("&eLeft-click to toggle"),
+                    Messages.legacy("&6Right-click: restrict this kit to this map")));
+            meta.getPersistentDataContainer().set(kitKey, PersistentDataType.STRING, id);
+            item.setItemMeta(meta);
+            inventory.setItem(slot++, item);
+        }
+        ItemStack all = new ItemStack(Material.NETHER_STAR);
+        ItemMeta allMeta = all.getItemMeta();
+        allMeta.displayName(Messages.legacy("&a&lAllow all kits"));
+        allMeta.lore(List.of(Messages.legacy("&7Remove all restrictions from this map"), Messages.legacy("&eClick to reset")));
+        all.setItemMeta(allMeta);
+        inventory.setItem(49, all);
+        player.openInventory(inventory);
+    }
+
+    @EventHandler(priority = org.bukkit.event.EventPriority.HIGHEST)
+    public void setupClick(InventoryClickEvent event) {
+        if (!event.getView().title().equals(MAPS_TITLE) && !event.getView().title().equals(KITS_TITLE)) return;
+        event.setCancelled(true);
+        if (!(event.getWhoClicked() instanceof Player player) || event.getRawSlot() < 0
+                || event.getRawSlot() >= event.getView().getTopInventory().getSize()) return;
+        ItemStack item = event.getCurrentItem();
+        if (item == null || !item.hasItemMeta()) return;
+        if (event.getView().title().equals(MAPS_TITLE)) {
+            String arena = item.getItemMeta().getPersistentDataContainer().get(arenaKey, PersistentDataType.STRING);
+            if (arena != null) openKitAccess(player, arena);
+            return;
+        }
+        String arenaName = editingArena.get(player.getUniqueId());
+        ArenaManager.Arena arena = arenaName == null ? null : arenas.get(arenaName);
+        if (arena == null) return;
+        if (event.getRawSlot() == 49) {
+            arenas.setAllowedKits(arenaName, null);
+            plugin.message(player, "Map &c" + arena.name() + " &fnow allows &aall kits&f.");
+            openKitAccess(player, arenaName);
+            return;
+        }
+        String kit = item.getItemMeta().getPersistentDataContainer().get(kitKey, PersistentDataType.STRING);
+        if (kit == null) return;
+        if (event.isRightClick()) {
+            restrictKitToArena(kit, arenaName);
+            plugin.message(player, kits.displayName(kit) + " &fis now restricted to map &c" + arena.name() + "&f. Other kits can still use this map.");
+            openKitAccess(player, arenaName);
+            return;
+        }
+        Set<String> allowed = arena.allowedKits() == null ? new LinkedHashSet<>(kits.kitIds()) : new LinkedHashSet<>(arena.allowedKits());
+        if (!allowed.remove(kit)) allowed.add(kit);
+        arenas.setAllowedKits(arenaName, allowed);
+        openKitAccess(player, arenaName);
+    }
+
+    private void restrictKitToArena(String kit, String selectedArena) {
+        for (ArenaManager.Arena candidate : arenas.all()) {
+            if (candidate.name().equalsIgnoreCase(selectedArena)) {
+                if (candidate.allowedKits() != null) {
+                    Set<String> allowed = new LinkedHashSet<>(candidate.allowedKits());
+                    allowed.add(kit);
+                    arenas.setAllowedKits(candidate.name(), allowed);
+                }
+                continue;
+            }
+            Set<String> allowed = candidate.allowedKits() == null
+                    ? new LinkedHashSet<>(kits.kitIds()) : new LinkedHashSet<>(candidate.allowedKits());
+            allowed.remove(kit);
+            arenas.setAllowedKits(candidate.name(), allowed);
+        }
+    }
+
+    @EventHandler public void setupDrag(InventoryDragEvent event) {
+        if (event.getView().title().equals(MAPS_TITLE) || event.getView().title().equals(KITS_TITLE)) event.setCancelled(true);
     }
 
     private boolean delete(CommandSender sender, String[] args) {
@@ -178,6 +315,7 @@ final class AdminCommand implements TabExecutor, Listener {
     private void help(CommandSender sender) {
         sender.sendMessage(Messages.legacy("&8&m--------------------------------"));
         sender.sendMessage(Messages.legacy("&c&lPeakPvP Admin Setup"));
+        sender.sendMessage(Messages.legacy("&fOpen map and kit setup: &c/peakpvp setup"));
         sender.sendMessage(Messages.legacy("&fCreate an arena in four simple steps:"));
         sender.sendMessage(Messages.legacy("&81. &c/peakpvp arena wand &7- get the selection tool"));
         sender.sendMessage(Messages.legacy("&82. &fLeft/right-click opposite arena corners"));

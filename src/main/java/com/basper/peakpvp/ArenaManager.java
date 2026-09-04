@@ -11,10 +11,14 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
+import java.util.LinkedHashSet;
 
 final class ArenaManager {
-    record Arena(String name, Location corner1, Location corner2, Location spawn1, Location spawn2) {
+    record Arena(String name, Location corner1, Location corner2, Location spawn1, Location spawn2,
+                 Set<String> allowedKits) {
         boolean ready() { return spawn1 != null && spawn2 != null; }
+        boolean allowsKit(String kit) { return allowedKits == null || allowedKits.contains(kit.toLowerCase(Locale.ROOT)); }
     }
 
     private final PeakPvPPlugin plugin;
@@ -38,7 +42,10 @@ final class ArenaManager {
             if (corner1 == null || corner2 == null) continue;
             arenas.put(key.toLowerCase(Locale.ROOT), new Arena(
                     data.getString(path + "name", key), corner1, corner2,
-                    data.getLocation(path + "spawn-1"), data.getLocation(path + "spawn-2")));
+                    data.getLocation(path + "spawn-1"), data.getLocation(path + "spawn-2"),
+                    data.contains(path + "allowed-kits")
+                            ? new LinkedHashSet<>(data.getStringList(path + "allowed-kits").stream()
+                            .map(value -> value.toLowerCase(Locale.ROOT)).toList()) : null));
         }
     }
 
@@ -65,7 +72,7 @@ final class ArenaManager {
     boolean create(String name, Location corner1, Location corner2) {
         String key = name.toLowerCase(Locale.ROOT);
         if (arenas.containsKey(key)) return false;
-        arenas.put(key, new Arena(name, corner1.clone(), corner2.clone(), null, null));
+        arenas.put(key, new Arena(name, corner1.clone(), corner2.clone(), null, null, null));
         save();
         return true;
     }
@@ -75,11 +82,21 @@ final class ArenaManager {
         Arena old = arenas.get(key);
         if (old == null) return false;
         Arena updated = number == 1
-                ? new Arena(old.name, old.corner1, old.corner2, location.clone(), old.spawn2)
-                : new Arena(old.name, old.corner1, old.corner2, old.spawn1, location.clone());
+                ? new Arena(old.name, old.corner1, old.corner2, location.clone(), old.spawn2, old.allowedKits)
+                : new Arena(old.name, old.corner1, old.corner2, old.spawn1, location.clone(), old.allowedKits);
         arenas.put(key, updated);
         save();
         return true;
+    }
+
+    void setAllowedKits(String name, Set<String> allowedKits) {
+        String key = name.toLowerCase(Locale.ROOT);
+        Arena old = arenas.get(key);
+        if (old == null) return;
+        Set<String> normalized = allowedKits == null ? null : new LinkedHashSet<>(allowedKits.stream()
+                .map(value -> value.toLowerCase(Locale.ROOT)).toList());
+        arenas.put(key, new Arena(old.name, old.corner1, old.corner2, old.spawn1, old.spawn2, normalized));
+        save();
     }
 
     boolean delete(String name) {
@@ -98,6 +115,7 @@ final class ArenaManager {
             data.set(path + "corner-2", arena.corner2);
             data.set(path + "spawn-1", arena.spawn1);
             data.set(path + "spawn-2", arena.spawn2);
+            if (arena.allowedKits != null) data.set(path + "allowed-kits", new ArrayList<>(arena.allowedKits));
         }
         try { data.save(file); }
         catch (IOException exception) { throw new IllegalStateException("Could not save arenas.yml", exception); }

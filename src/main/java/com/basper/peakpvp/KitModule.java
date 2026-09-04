@@ -49,8 +49,9 @@ final class KitModule implements Listener, TabExecutor {
     private static final Component RANKED_TITLE = Messages.legacy("&0Ranked Latest Kits &8- &bLatest ELO");
     private static final Component EDITOR_TITLE = Messages.legacy("&0Kit Editor");
     private static final Component LAYOUT_TITLE = Messages.legacy("&0Edit Kit Layout");
-    private static final int[] KIT_SLOTS = {0, 1, 2, 3, 4, 5, 6, 9, 10, 11, 12, 13, 14, 15};
-    private static final int FAST_JOIN_SLOT = 17;
+    private static final int[] KIT_SLOTS = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
+            13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25};
+    private static final int FAST_JOIN_SLOT = 26;
     private static final String FAST_JOIN_ID = "__fast_join__";
     private final PeakPvPPlugin plugin;
     private final ArenaManager arenas;
@@ -65,6 +66,7 @@ final class KitModule implements Listener, TabExecutor {
     private final Map<Integer, String> menuSlots = new java.util.HashMap<>();
     private final Map<String, LinkedHashSet<UUID>> queues = new java.util.LinkedHashMap<>();
     private final Map<String, LinkedHashSet<UUID>> rankedQueues = new java.util.LinkedHashMap<>();
+    private final LinkedHashSet<UUID> quickJoiners = new LinkedHashSet<>();
     private final Set<UUID> queuedRanked = new HashSet<>();
     private final Map<UUID, String> queuedKits = new java.util.HashMap<>();
     private final Map<UUID, UUID> forcedOpponents = new java.util.HashMap<>();
@@ -104,6 +106,10 @@ final class KitModule implements Listener, TabExecutor {
     }
 
     void setPartyModule(PartyModule parties) { this.parties = parties; }
+
+    List<String> kitIds() { return new ArrayList<>(kits.keySet()); }
+    String displayName(String id) { return displayNames.getOrDefault(id, "&a" + id); }
+    Material icon(String id) { return icons.getOrDefault(id, Material.DIAMOND_SWORD); }
 
     void load() {
         kits.clear();
@@ -155,7 +161,7 @@ final class KitModule implements Listener, TabExecutor {
 
     void openUnrankedMenu(Player player) {
         if (!player.hasPermission("peakpvp.kit.use")) { plugin.message(player, "You do not have permission to choose a kit."); return; }
-        Inventory inventory = Bukkit.createInventory(null, 18, MENU_TITLE);
+        Inventory inventory = Bukkit.createInventory(null, 27, MENU_TITLE);
         menuSlots.clear();
         int index = 0;
         for (String id : kits.keySet()) {
@@ -173,7 +179,7 @@ final class KitModule implements Listener, TabExecutor {
     void openRankedMenu(Player player) { openKitMenu(player, true); }
 
     void openKitEditor(Player player) {
-        Inventory inventory = Bukkit.createInventory(null, 18, EDITOR_TITLE);
+        Inventory inventory = Bukkit.createInventory(null, 27, EDITOR_TITLE);
         int index = 0;
         for (String id : kits.keySet()) {
             if (index >= KIT_SLOTS.length) break;
@@ -189,13 +195,13 @@ final class KitModule implements Listener, TabExecutor {
         meta.displayName(Messages.legacy("&a&lCopy all Unranked layouts to Ranked"));
         meta.lore(List.of(Messages.legacy("&7Ranked and Unranked use the same personal layouts."), Messages.legacy("&eClick to copy all kits")));
         copy.setItemMeta(meta);
-        inventory.setItem(17, copy);
+        inventory.setItem(26, copy);
         player.openInventory(inventory);
     }
 
     private void openKitMenu(Player player, boolean ranked) {
         if (!player.hasPermission("peakpvp.kit.use")) { plugin.message(player, "You do not have permission to choose a kit."); return; }
-        Inventory inventory = Bukkit.createInventory(null, 18, ranked ? RANKED_TITLE : MENU_TITLE);
+        Inventory inventory = Bukkit.createInventory(null, 27, ranked ? RANKED_TITLE : MENU_TITLE);
         int index = 0;
         for (String id : kits.keySet()) {
             if (index >= KIT_SLOTS.length) break;
@@ -229,6 +235,28 @@ final class KitModule implements Listener, TabExecutor {
     void cancelQueue(UUID playerId) {
         leaveQueue(playerId);
         refreshOpenMenus();
+    }
+
+    void quickJoinAny(Player player) {
+        if (!player.hasPermission("peakpvp.kit.use")) { plugin.message(player, "You do not have permission to queue."); return; }
+        if (duels.containsKey(player.getUniqueId())) { plugin.message(player, "You are already in a duel."); return; }
+        if (parties != null && parties.membersForQueue(player.getUniqueId()).size() == 2) {
+            plugin.message(player, "Quick Join is for solo players. Choose a kit to queue your party.");
+            return;
+        }
+        leaveQueue(player.getUniqueId());
+        for (boolean ranked : List.of(false, true)) {
+            Map<String, LinkedHashSet<UUID>> queueMap = ranked ? rankedQueues : queues;
+            for (Map.Entry<String, LinkedHashSet<UUID>> entry : queueMap.entrySet()) {
+                if (entry.getValue().stream().anyMatch(id -> Bukkit.getPlayer(id) != null)) {
+                    queue(player, entry.getKey(), ranked);
+                    return;
+                }
+            }
+        }
+        quickJoiners.add(player.getUniqueId());
+        player.closeInventory();
+        plugin.message(player, "Quick Join active. You will join the first &e1.8 &for &bLatest &fkit another player selects.");
     }
 
     void enterPvpZone(Player player) {
@@ -321,15 +349,35 @@ final class KitModule implements Listener, TabExecutor {
             }
         }
         leaveQueue(player.getUniqueId());
-        (ranked ? rankedQueues : queues).computeIfAbsent(id, ignored -> new LinkedHashSet<>()).add(player.getUniqueId());
-        queuedKits.put(player.getUniqueId(), id);
-        if (ranked) queuedRanked.add(player.getUniqueId());
+        addToQueue(player.getUniqueId(), id, ranked);
         player.closeInventory();
         plugin.message(player, "Queued for " + (ranked ? "&bRanked Latest" : "&eRanked 1.8") + " &f"
                 + displayNames.getOrDefault(id, "&a" + name) + " &8| &fCombat: " + combatName(id, ranked)
                 + " &8| &fELO: &e" + stats.elo(player, ranked) + "&f.");
+        Player quickPlayer = takeQuickJoiner();
+        if (quickPlayer != null) {
+            addToQueue(quickPlayer.getUniqueId(), id, ranked);
+            plugin.message(quickPlayer, "Quick Join found " + (ranked ? "&bLatest" : "&e1.8") + " &f"
+                    + displayNames.getOrDefault(id, "&a" + id) + "&f.");
+        }
         tryStart(id, ranked);
         refreshOpenMenus();
+    }
+
+    private void addToQueue(UUID playerId, String kit, boolean ranked) {
+        (ranked ? rankedQueues : queues).computeIfAbsent(kit, ignored -> new LinkedHashSet<>()).add(playerId);
+        queuedKits.put(playerId, kit);
+        if (ranked) queuedRanked.add(playerId);
+    }
+
+    private Player takeQuickJoiner() {
+        while (!quickJoiners.isEmpty()) {
+            UUID id = quickJoiners.iterator().next();
+            quickJoiners.remove(id);
+            Player player = Bukkit.getPlayer(id);
+            if (player != null && !duels.containsKey(id)) return player;
+        }
+        return null;
     }
 
     private void queueParty(String kit, List<UUID> party, boolean ranked) {
@@ -452,7 +500,7 @@ final class KitModule implements Listener, TabExecutor {
                 if (second != null) queue(second, kit, ranked);
                 continue;
             }
-            ArenaManager.Arena arena = findAvailableArena();
+            ArenaManager.Arena arena = findAvailableArena(kit);
             if (arena == null) {
                 queue.add(firstId);
                 queue.add(secondId);
@@ -482,15 +530,18 @@ final class KitModule implements Listener, TabExecutor {
         if (queue.isEmpty()) queueMap.remove(kit);
     }
 
-    private ArenaManager.Arena findAvailableArena() {
+    private ArenaManager.Arena findAvailableArena(String kit) {
+        List<ArenaManager.Arena> available = new ArrayList<>();
         for (ArenaManager.Arena arena : arenas.all()) {
             if (arena.ready() && arena.spawn1().getWorld() != null && arena.spawn2().getWorld() != null
-                    && !usedArenas.contains(arena.name().toLowerCase(Locale.ROOT))) return arena;
+                    && arena.allowsKit(kit)
+                    && !usedArenas.contains(arena.name().toLowerCase(Locale.ROOT))) available.add(arena);
         }
-        return null;
+        return available.isEmpty() ? null : available.get(ThreadLocalRandom.current().nextInt(available.size()));
     }
 
     private void leaveQueue(UUID playerId) {
+        quickJoiners.remove(playerId);
         String oldKit = queuedKits.remove(playerId);
         if (oldKit != null) {
             Map<String, LinkedHashSet<UUID>> queueMap = queuedRanked.remove(playerId) ? rankedQueues : queues;

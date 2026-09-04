@@ -1,4 +1,4 @@
-config-version: 4
+config-version: 5
 
 kits:
   unranked:
@@ -8,8 +8,8 @@ kits:
       items:
         '0': {material: DIAMOND_SWORD, amount: 1, enchantments: {fire_aspect: 2, sharpness: 2, unbreaking: 3}}
         '1': {material: ENDER_PEARL, amount: 16}
-        '2': {material: POTION, amount: 1, effect: SPEED, amplifier: 1}
-        '3': {material: POTION, amount: 1, effect: FIRE_RESISTANCE}
+        '2': {material: SPLASH_POTION, amount: 1, effect: SPEED, amplifier: 1}
+        '3': {material: SPLASH_POTION, amount: 1, effect: FIRE_RESISTANCE}
         '8': {material: COOKED_BEEF, amount: 32}
       fills:
         healing: {material: SPLASH_POTION, amount: 1, effect: INSTANT_HEALTH, slots: '4-7,9-35'}
@@ -28,8 +28,8 @@ kits:
         '3': {material: SPLASH_POTION, amount: 1, effect: POISON}
         '4': {material: SPLASH_POTION, amount: 1, effect: INSTANT_HEALTH}
         '5': {material: SPLASH_POTION, amount: 1, effect: INSTANT_HEALTH}
-        '6': {material: POTION, amount: 1, effect: SPEED, amplifier: 1}
-        '7': {material: POTION, amount: 1, effect: FIRE_RESISTANCE}
+        '6': {material: SPLASH_POTION, amount: 1, effect: SPEED, amplifier: 1}
+        '7': {material: SPLASH_POTION, amount: 1, effect: FIRE_RESISTANCE}
         '8': {material: COOKED_BEEF, amount: 64}
       fills:
         healing: {material: SPLASH_POTION, amount: 1, effect: INSTANT_HEALTH, slots: '9-35'}
@@ -84,10 +84,10 @@ kits:
         '3': {material: DIAMOND_CHESTPLATE, amount: 1, enchantments: {unbreaking: 3, protection: 4}}
         '4': {material: DIAMOND_LEGGINGS, amount: 1, enchantments: {unbreaking: 3, protection: 4}}
         '5': {material: DIAMOND_BOOTS, amount: 1, enchantments: {unbreaking: 3, protection: 4}}
-        '7': {material: POTION, amount: 1, effect: STRENGTH, amplifier: 1}
-        '8': {material: POTION, amount: 1, effect: SPEED, amplifier: 1}
-        '34': {material: POTION, amount: 1, effect: STRENGTH, amplifier: 1}
-        '35': {material: POTION, amount: 1, effect: SPEED, amplifier: 1}
+        '7': {material: SPLASH_POTION, amount: 1, effect: STRENGTH, amplifier: 1}
+        '8': {material: SPLASH_POTION, amount: 1, effect: SPEED, amplifier: 1}
+        '34': {material: SPLASH_POTION, amount: 1, effect: STRENGTH, amplifier: 1}
+        '35': {material: SPLASH_POTION, amount: 1, effect: SPEED, amplifier: 1}
       armor:
         boots: {material: DIAMOND_BOOTS, enchantments: {unbreaking: 3, protection: 4}}
         leggings: {material: DIAMOND_LEGGINGS, enchantments: {unbreaking: 3, protection: 4}}
@@ -103,10 +103,10 @@ kits:
         '3': {material: DIAMOND_CHESTPLATE, amount: 1, enchantments: {unbreaking: 3, protection: 4}}
         '4': {material: DIAMOND_LEGGINGS, amount: 1, enchantments: {unbreaking: 3, protection: 4}}
         '5': {material: DIAMOND_BOOTS, amount: 1, enchantments: {unbreaking: 3, protection: 4}}
-        '7': {material: POTION, amount: 1, effect: STRENGTH, amplifier: 1}
-        '8': {material: POTION, amount: 1, effect: SPEED, amplifier: 1}
-        '34': {material: POTION, amount: 1, effect: STRENGTH, amplifier: 1}
-        '35': {material: POTION, amount: 1, effect: SPEED, amplifier: 1}
+        '7': {material: SPLASH_POTION, amount: 1, effect: STRENGTH, amplifier: 1}
+        '8': {material: SPLASH_POTION, amount: 1, effect: SPEED, amplifier: 1}
+        '34': {material: SPLASH_POTION, amount: 1, effect: STRENGTH, amplifier: 1}
+        '35': {material: SPLASH_POTION, amount: 1, effect: SPEED, amplifier: 1}
       armor:
         boots: {material: DIAMOND_BOOTS, enchantments: {unbreaking: 3, protection: 4}}
         leggings: {material: DIAMOND_LEGGINGS, enchantments: {unbreaking: 3, protection: 4}}
@@ -117,7 +117,7 @@ kits:
       icon: MUSHROOM_STEW
       items:
         '0': {material: DIAMOND_SWORD, amount: 1, enchantments: {sharpness: 1}}
-        '8': {material: POTION, amount: 1, effect: SPEED, amplifier: 1}
+        '8': {material: SPLASH_POTION, amount: 1, effect: SPEED, amplifier: 1}
       fills:
         soup: {material: MUSHROOM_STEW, amount: 1, slots: '1-7,9-35'}
       armor:
@@ -151,7 +151,7 @@ kits:
         '2': {material: BOW, amount: 1}
         '3': {material: FLINT_AND_STEEL, amount: 1}
         '4': {material: WATER_BUCKET, amount: 1}
-        '5': {material: POTION, amount: 1, name: '&fUncraftable Potion'}
+        '5': {material: SPLASH_POTION, amount: 1, name: '&fUncraftable Potion'}
         '6': {material: SNOWBALL, amount: 6}
         '7': {material: BREAD, amount: 9}
         '8': {material: OAK_PLANKS, amount: 64}
@@ -217,6 +217,86 @@ kits:
         leggings: {material: NETHERITE_LEGGINGS, enchantments: {protection: 6}}
         chestplate: {material: NETHERITE_CHESTPLATE, enchantments: {protection: 6}}
         helmet: {material: NETHERITE_HELMET, enchantments: {protection: 6}}
+    spear-mace:
+      display-name: '&6Spear Mace'
+      modern-pvp: true
+      icon: NETHERITE_SPEAR
+      items:
+        '0': {material: NETHERITE_SPEAR, amount: 1, enchantments: {lunge: 3, sharpness: 5}}
+        '1': {material: MACE, amount: 1, enchantments: {wind_burst: 1, density: 5}}
+        '2': {material: NETHERITE_SWORD, amount: 1, enchantments: {sharpness: 5, unbreaking: 3}}
+        '3': {material: NETHERITE_AXE, amount: 1, enchantments: {sharpness: 5, unbreaking: 3}}
+        '4': {material: WIND_CHARGE, amount: 64}
+        '5': {material: ENDER_PEARL, amount: 16}
+        '6': {material: SPLASH_POTION, amount: 1, effect: STRENGTH, amplifier: 1}
+        '7': {material: SHIELD, amount: 1, enchantments: {unbreaking: 3}}
+        '8': {material: GOLDEN_APPLE, amount: 64}
+        '9': {material: WIND_CHARGE, amount: 64}
+        '10': {material: WIND_CHARGE, amount: 64}
+        '11': {material: ENDER_PEARL, amount: 16}
+        '12': {material: SPLASH_POTION, amount: 1, effect: SPEED}
+        '13': {material: SPLASH_POTION, amount: 1, effect: FIRE_RESISTANCE}
+        '14': {material: TOTEM_OF_UNDYING, amount: 1}
+        '15': {material: TOTEM_OF_UNDYING, amount: 1}
+        '16': {material: TOTEM_OF_UNDYING, amount: 1}
+        '17': {material: GOLDEN_CARROT, amount: 64}
+      armor:
+        boots: {material: NETHERITE_BOOTS, enchantments: {protection: 4}}
+        leggings: {material: NETHERITE_LEGGINGS, enchantments: {protection: 4}}
+        chestplate: {material: NETHERITE_CHESTPLATE, enchantments: {protection: 4}}
+        helmet: {material: NETHERITE_HELMET, enchantments: {protection: 4}}
+    cart:
+      display-name: '&eCart'
+      modern-pvp: true
+      icon: TNT_MINECART
+      items:
+        '0': {material: DIAMOND_SWORD, amount: 1, enchantments: {sharpness: 1}}
+        '1': {material: GOLDEN_APPLE, amount: 16}
+        '2': {material: GOLDEN_CARROT, amount: 32}
+        '3': {material: WATER_BUCKET, amount: 1}
+        '4': {material: DIAMOND_PICKAXE, amount: 1}
+        '5': {material: BOW, amount: 1, enchantments: {flame: 1}}
+        '6': {material: ARROW, amount: 64}
+        '7': {material: COBBLESTONE, amount: 64}
+        '8': {material: RAIL, amount: 64}
+        '9': {material: COBWEB, amount: 64}
+        '10': {material: TOTEM_OF_UNDYING, amount: 1}
+        '11': {material: TOTEM_OF_UNDYING, amount: 1}
+        '12': {material: TOTEM_OF_UNDYING, amount: 1}
+        '13': {material: TOTEM_OF_UNDYING, amount: 1}
+        '14': {material: TOTEM_OF_UNDYING, amount: 1}
+      fills:
+        carts: {material: TNT_MINECART, amount: 1, slots: '15-35'}
+      armor:
+        boots: {material: DIAMOND_BOOTS, enchantments: {protection: 4}}
+        leggings: {material: DIAMOND_LEGGINGS, enchantments: {blast_protection: 4}}
+        chestplate: {material: DIAMOND_CHESTPLATE, enchantments: {protection: 4}}
+        helmet: {material: DIAMOND_HELMET, enchantments: {protection: 4}}
+    op-cart:
+      display-name: '&cOP Cart'
+      modern-pvp: true
+      icon: TNT_MINECART
+      items:
+        '0': {material: NETHERITE_SWORD, amount: 1, enchantments: {sharpness: 5, unbreaking: 3}}
+        '1': {material: ENDER_PEARL, amount: 16}
+        '2': {material: COBWEB, amount: 64}
+        '3': {material: WATER_BUCKET, amount: 1}
+        '4': {material: BOW, amount: 1, enchantments: {flame: 1}}
+        '5': {material: COBBLESTONE, amount: 64}
+        '6': {material: RAIL, amount: 64}
+        '7': {material: FLINT_AND_STEEL, amount: 1}
+        '8': {material: CROSSBOW, amount: 1, enchantments: {quick_charge: 3}}
+        '9': {material: ARROW, amount: 64}
+        '10': {material: TOTEM_OF_UNDYING, amount: 1}
+        '11': {material: TOTEM_OF_UNDYING, amount: 1}
+        '12': {material: TOTEM_OF_UNDYING, amount: 1}
+      fills:
+        carts: {material: TNT_MINECART, amount: 1, slots: '13-35'}
+      armor:
+        boots: {material: NETHERITE_BOOTS, enchantments: {protection: 4, unbreaking: 3}}
+        leggings: {material: NETHERITE_LEGGINGS, enchantments: {protection: 4, unbreaking: 3}}
+        chestplate: {material: NETHERITE_CHESTPLATE, enchantments: {protection: 4, unbreaking: 3}}
+        helmet: {material: NETHERITE_HELMET, enchantments: {protection: 4, unbreaking: 3}}
     boxing:
       display-name: '&9Boxing'
       icon: IRON_HELMET

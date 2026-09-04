@@ -29,7 +29,8 @@ final class WorldProtection implements Listener {
 
     @EventHandler(ignoreCancelled = true) public void breakBlock(BlockBreakEvent event) {
         if (isPvPWorld(event.getBlock().getWorld()) && !event.getPlayer().hasPermission("peakpvp.admin.build")
-                && !rollback.canEdit(event.getBlock().getLocation())
+                && !(rollback.canEdit(event.getBlock().getLocation())
+                && plugin.getConfig().getBoolean("arena-rules.allow-block-breaking", false))
                 && !rollback.canTemporaryEdit(event.getBlock().getLocation())) event.setCancelled(true);
     }
 

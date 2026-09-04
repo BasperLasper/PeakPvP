@@ -2,7 +2,7 @@ name: PeakPvP
 version: '${version}'
 main: com.basper.peakpvp.PeakPvPPlugin
 load: STARTUP
-api-version: '1.21'
+api-version: '1.21.11'
 authors: [Basper]
 description: Peak's duels and kit PvP server plugin.
 softdepend: [LuckPerms]
